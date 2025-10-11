@@ -8,16 +8,18 @@ export default function Home() {
   const [email, setEmail] = useState("");
 
   return (
-   <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.logoContainer}>
         <Image
-          source={require('../assets/knowball-oracle.png')}
+          source={require("../assets/knowball-oracle.png")}
           style={styles.logo}
           resizeMode="contain"
         />
       </View>
 
-      <Text style={styles.subtitle}>Combate a manipulação no futebol brasileiro masculino nas categorias de base</Text>
+      <Text style={styles.subtitle}>
+        Combate à manipulação no futebol brasileiro masculino nas categorias de base
+      </Text>
 
       <TextInput
         style={styles.input}
@@ -41,7 +43,7 @@ export default function Home() {
         }}
         asChild
       >
-        <Button title="Enviar denúncia" color="#d62828" />
+        <Button title="Continuar" color="#ff0000" />
       </Link>
     </SafeAreaView>
   );
@@ -52,24 +54,21 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 24,
     justifyContent: "center",
-    backgroundColor: "#111",
+    backgroundColor: "#111111",
   },
   logoContainer: {
-  alignItems: "center",
-  marginBottom: 40, // aumenta o respiro entre logo e texto
+    alignItems: "center",
+    marginBottom: 30,
   },
-  title: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 8,
-    textAlign: "center",
+  logo: {
+    width: 350,
+    height: 120,
   },
   subtitle: {
     fontSize: 17,
     color: "#ccc",
     marginBottom: 25,
-    lineHeight: 20,
+    lineHeight: 23,
     textAlign: "center",
   },
   input: {
