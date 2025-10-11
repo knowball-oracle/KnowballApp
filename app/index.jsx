@@ -10,7 +10,7 @@ export default function Home() {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Knowball</Text>
-      <Text style={styles.subtitle}>Combate à manipulação no futebol de base</Text>
+      <Text style={styles.subtitle}>Combate a manipulação no futebol de base</Text>
 
       <TextInput
         style={styles.input}
