@@ -1,4 +1,4 @@
-import { Text, Button, TextInput, StyleSheet, View } from "react-native";
+import { Text, Button, TextInput, StyleSheet, Image, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link } from "expo-router";
 import { useState } from "react";
@@ -8,9 +8,16 @@ export default function Home() {
   const [email, setEmail] = useState("");
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Knowball</Text>
-      <Text style={styles.subtitle}>Combate a manipulação no futebol de base</Text>
+   <SafeAreaView style={styles.container}>
+      <View style={styles.logoContainer}>
+        <Image
+          source={require('../assets/knowball-oracle.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+      </View>
+
+      <Text style={styles.subtitle}>Combate a manipulação no futebol brasileiro masculino nas categorias de base</Text>
 
       <TextInput
         style={styles.input}
@@ -47,6 +54,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#111",
   },
+  logoContainer: {
+  alignItems: "center",
+  marginBottom: 40, // aumenta o respiro entre logo e texto
+  },
   title: {
     fontSize: 26,
     fontWeight: "bold",
@@ -55,9 +66,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: "#ccc",
-    marginBottom: 20,
+    marginBottom: 25,
+    lineHeight: 20,
     textAlign: "center",
   },
   input: {
