@@ -14,26 +14,28 @@ export default function Denuncia() {
 
   const protocolo = "123456";
 
-  const categorias = ["Sub-13", "Sub-15", "Sub-17", "Sub-20"];
-
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Formulário de Denúncia</Text>
 
-      <Text style={styles.label}>Categoria de base:</Text>
+  <Text style={styles.label}>
+        Categoria de base:{" "}
+        <Text style={styles.categoriaSelecionadaTexto}>{categoria || "Nenhuma"}</Text>
+      </Text>
+
       <View style={styles.categoriaContainer}>
-        {categorias.map((item) => (
-          <TouchableOpacity
-            key={item}
-            style={[
-              styles.categoriaBotao,
-              categoria === item && styles.categoriaSelecionada
-            ]}
-            onPress={() => setCategoria(item)}
-          >
-            <Text style={styles.categoriaTexto}>{item}</Text>
-          </TouchableOpacity>
-        ))}
+        <TouchableOpacity style={styles.categoriaBotao} onPress={() => setCategoria("Sub-13")}>
+          <Text style={styles.categoriaTexto}>Sub-13</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.categoriaBotao} onPress={() => setCategoria("Sub-15")}>
+          <Text style={styles.categoriaTexto}>Sub-15</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.categoriaBotao} onPress={() => setCategoria("Sub-17")}>
+          <Text style={styles.categoriaTexto}>Sub-17</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.categoriaBotao} onPress={() => setCategoria("Sub-20")}>
+          <Text style={styles.categoriaTexto}>Sub-20</Text>
+        </TouchableOpacity>
       </View>
 
       <TextInput
@@ -118,12 +120,14 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   categoriaBotao: {
-    backgroundColor: "#444",
+    backgroundColor: "#D62828",
     padding: 10,
     borderRadius: 8,
+
   },
-  categoriaSelecionada: {
-    backgroundColor: "#d62828",
+  categoriaSelecionadaTexto: {
+    color: "#fff",
+    fontWeight: "bold", 
   },
   categoriaTexto: {
     color: "#fff",
