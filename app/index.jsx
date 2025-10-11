@@ -36,7 +36,7 @@ export default function Home() {
 
       <Link
         href={{
-          pathname: "/user",
+          pathname: "/denuncia",
           params: { nome, email },
         }}
         asChild
@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   subtitle: {
-    fontSize: 15,
+    fontSize: 17,
     color: "#ccc",
     marginBottom: 25,
     lineHeight: 20,
