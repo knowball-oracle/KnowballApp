@@ -99,7 +99,7 @@ A solução oferece um canal seguro e simples para **denúncias anônimas e regi
 | Nome | RM | GitHub | LinkedIn |
 |------|----|---------|----------|
 | **Patrick Castro Quintana** | RM559271 | [castropatrick](https://github.com/castropatrick) | [LinkedIn](https://www.linkedin.com/in/patrick-castro-839aa2273/) |
-| **Gabriel Oliveira Rossi** | RM560967 | [gabriel-oliveira-rossi](https://github.com/gabriel-oliveira-rossi) | [LinkedIn](https://www.linkedin.com/in/gabriel-oliveira-rossi-155baa324/) |
+| **Gabriel Oliveira Rossi** | RM560967 | [gabriel-oliveira-rossi](https://github.com/gabrielrossi01) | [LinkedIn](https://www.linkedin.com/in/gabriel-oliveira-rossi-155baa324/) |
 | **Rodrigo Naoki Yamasaki** | RM560759 | [RodrygoYamasaki](https://github.com/RodrygoYamasaki) | [LinkedIn](https://www.linkedin.com/in/rodrigo-yamasaki-74a3b1324/) |
 
 ---
