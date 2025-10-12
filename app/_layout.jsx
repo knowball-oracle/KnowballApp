@@ -26,7 +26,7 @@ export default function Layout() {
         options={{
           title: "Sobre",
           tabBarIcon: ({ focused, size }) => (
-            <Ionicons name="about" color={focused ? "#d62828" : "#888"} size={size} />
+            <Ionicons name="information" color={focused ? "#d62828" : "#888"} size={size} />
           ),
         }}
       
