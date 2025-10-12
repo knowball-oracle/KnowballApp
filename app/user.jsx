@@ -3,8 +3,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams } from "expo-router";
 
 export default function User() {
-  const { nome, protocolo } = useLocalSearchParams();
+ const { nome, protocolo } = useLocalSearchParams();
 
+ 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Denúncia enviada com sucesso!</Text>

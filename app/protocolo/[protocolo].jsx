@@ -1,14 +1,59 @@
-import { Text, StyleSheet } from "react-native";
+import { useEffect, useState } from "react";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useLocalSearchParams } from "expo-router";
 
 export default function Protocolo() {
-  const { protocolo } = useLocalSearchParams();
+  const [listaDenuncias, setListaDenuncias] = useState([]);
+
+  async function buscarDenuncias() {
+    const dados = await AsyncStorage.getItem("DENUNCIAS");
+    if (dados != null) {
+      setListaDenuncias(JSON.parse(dados));
+    }
+  }
+
+  async function limparDenuncias() {
+    await AsyncStorage.removeItem("DENUNCIAS");
+    setListaDenuncias([]);
+    Alert.alert("Denúncias apagadas com sucesso!");
+  }
+
+  useEffect(() => {
+    buscarDenuncias();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.label}>Protocolo da denúncia:</Text>
-      <Text style={styles.codigo}>#{protocolo}</Text>
+      <Text style={styles.titulo}>Denúncias Registradas</Text>
+
+      <TouchableOpacity style={styles.botao} onPress={buscarDenuncias}>
+        <Text style={styles.botaoText}>Atualizar Lista</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.botao, { backgroundColor: "#d62828" }]}
+        onPress={limparDenuncias}
+      >
+        <Text style={styles.botaoText}>Limpar Todas</Text>
+      </TouchableOpacity>
+
+      <FlatList
+        data={listaDenuncias}
+        renderItem={({ item }) => {
+          if (!item || !item.categoria) return null;
+          return (
+            <View style={styles.card}>
+              <Text style={styles.info}>Categoria: {item.categoria}</Text>
+              <Text style={styles.info}>Partida: {item.partida}</Text>
+              <Text style={styles.info}>Data: {item.data}</Text>
+              <Text style={styles.info}>Árbitro: {item.arbitro}</Text>
+              <Text style={styles.info}>Relato: {item.relato}</Text>
+              <Text style={styles.info}>Protocolo: {item.protocolo}</Text>
+            </View>
+          );
+        }}
+      />
     </SafeAreaView>
   );
 }
@@ -16,18 +61,34 @@ export default function Protocolo() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
     backgroundColor: "#111",
+    padding: 20,
   },
-  label: {
-    color: "#ccc",
+  titulo: {
+    color: "white",
     fontSize: 20,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 15,
+  },
+  botao: {
+    backgroundColor: "#444",
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center",
     marginBottom: 10,
   },
-  codigo: {
-    color: "#d62828",
-    fontSize: 28,
+  botaoText: {
+    color: "#fff",
     fontWeight: "bold",
+  },
+  card: {
+    backgroundColor: "#fff",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  info: {
+    color: "#000",
   },
 });
