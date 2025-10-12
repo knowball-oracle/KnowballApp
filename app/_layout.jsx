@@ -15,8 +15,18 @@ export default function Layout() {
         name="index"
         options={{
           title: "Início",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" color={color} size={size} />
+          tabBarIcon: ({ focused, size }) => (
+            <Ionicons name="home" color={focused ? "#d62828" : "#888"} size={size} />
+          ),
+        }}
+      
+      />
+      <Tabs.Screen
+        name="sobre"
+        options={{
+          title: "Sobre",
+          tabBarIcon: ({ focused, size }) => (
+            <Ionicons name="about" color={focused ? "#d62828" : "#888"} size={size} />
           ),
         }}
       
@@ -27,6 +37,7 @@ export default function Layout() {
           href: null, 
         }}
       />
+      
     </Tabs>
   );
 }
