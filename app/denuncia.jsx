@@ -123,7 +123,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#D62828",
     padding: 10,
     borderRadius: 8,
-
+    shadowColor: "#000",
+    shadowOpacity: 0.3
   },
   categoriaSelecionadaTexto: {
     color: "#fff",

@@ -1,17 +1,33 @@
-import { Text, View } from "react-native";
+import { Text, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams } from "expo-router";
 
 export default function Protocolo() {
   const { protocolo } = useLocalSearchParams();
 
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#111" }}>
-      <Text style={{ color: "#ccc", fontSize: 20, marginBottom: 10 }}>
-        Protocolo da denúncia:
-      </Text>
-      <Text style={{ color: "#d62828", fontSize: 28, fontWeight: "bold" }}>
-        #{protocolo}
-      </Text>
-    </View>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.label}>Protocolo da denúncia:</Text>
+      <Text style={styles.codigo}>#{protocolo}</Text>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#111",
+  },
+  label: {
+    color: "#ccc",
+    fontSize: 20,
+    marginBottom: 10,
+  },
+  codigo: {
+    color: "#d62828",
+    fontSize: 28,
+    fontWeight: "bold",
+  },
+});

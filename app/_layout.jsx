@@ -16,10 +16,10 @@ export default function Layout() {
         options={{
           title: "Início",
           tabBarIcon: ({ focused, size }) => (
-            <Ionicons name="home" color={focused ? "#d62828" : "#888"} size={size} />
+            <Ionicons name="home-outline" color={focused ? "#d62828" : "#888"} size={size} />
           ),
         }}
-      
+
       />
       <Tabs.Screen
         name="sobre"
@@ -29,15 +29,32 @@ export default function Layout() {
             <Ionicons name="information" color={focused ? "#d62828" : "#888"} size={size} />
           ),
         }}
-      
       />
+
+      <Tabs.Screen
+        name="protocolo/[protocolo]"
+        options={{
+          title: "Protocolo",
+          tabBarIcon: ({ focused, size }) => (
+            <Ionicons name="receipt-outline" color={focused ? "#d62828" : "#888"} size={size} />
+          ),
+        }}
+      />
+
       <Tabs.Screen
         name="denuncia"
         options={{
-          href: null, 
+          href: null,
         }}
       />
-      
+
+      <Tabs.Screen
+        name="user"
+        options={{
+          href: null,
+        }}
+      />
+
     </Tabs>
   );
 }
