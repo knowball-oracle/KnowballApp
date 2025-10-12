@@ -41,10 +41,10 @@ export default function Sobre() {
           <Image source={require("../assets/1760106364040.png")} style={styles.avatar} />
           <Text style={styles.name}>Gabriel Rossi</Text>
           <View style={styles.icons}>
-            <TouchableOpacity onPress={() => Linking.openURL("https://www.linkedin.com/in/gabriel-oliveira-rossi-155baa324/")}>
+            <TouchableOpacity onPress={() => Linking.openURL("https://github.com/GabrielRossi01")}>
               <Ionicons name="logo-github" size={20} color="#fff" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => Linking.openURL("https://linkedin.com/in/gabriel-oliveira-rossi")}>
+            <TouchableOpacity onPress={() => Linking.openURL("https://www.linkedin.com/in/gabriel-oliveira-rossi-155baa324/")}>
               <Ionicons name="logo-linkedin" size={20} color="#0e76a8" />
             </TouchableOpacity>
           </View>

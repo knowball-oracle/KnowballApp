@@ -7,6 +7,7 @@ export default function Home() {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
 
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.logoContainer}>

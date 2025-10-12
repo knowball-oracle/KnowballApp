@@ -1,8 +1,8 @@
 import { Text, TextInput, StyleSheet, View, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useState, } from "react";
-import { Link, useLocalSearchParams } from "expo-router";
+import { useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
 
 export default function Denuncia() {
   const { nome, email } = useLocalSearchParams();
@@ -12,9 +12,12 @@ export default function Denuncia() {
   const [arbitro, setArbitro] = useState("");
   const [relato, setRelato] = useState("");
 
-
-
   async function Salvar() {
+    if (!categoria || !partida || !data || !arbitro || !relato) {
+      Alert.alert("Atenção", "Por favor, preencha todos os campos.");
+      return;
+    }
+
     let denuncias = [];
 
     const dados = await AsyncStorage.getItem("DENUNCIAS");
@@ -22,7 +25,7 @@ export default function Denuncia() {
       denuncias = JSON.parse(dados);
     }
 
-     const protocolo = Math.floor(100000 + Math.random() * 900000).toString();
+    const protocolo = Math.floor(100000 + Math.random() * 900000).toString();
 
     denuncias.push({
       nome,
@@ -37,14 +40,10 @@ export default function Denuncia() {
 
     await AsyncStorage.setItem("DENUNCIAS", JSON.stringify(denuncias));
 
-    Alert.alert("Denúncia registrada com sucesso!",`Protocolo: ${protocolo}`);
-
-    setCategoria("");
-    setPartida("");
-    setData("");
-    setArbitro("");
-    setRelato("");
-    
+    router.push({
+      pathname: "/user",
+      params: { nome, protocolo }
+    });
   }
 
   return (
@@ -100,11 +99,9 @@ export default function Denuncia() {
         multiline
       />
 
-      <Link href="/user" asChild>
-        <TouchableOpacity onPress={Salvar} style={styles.botaoSalvar}>
-          <Text style={styles.botaoText}>Enviar denúncia</Text>
-        </TouchableOpacity>
-      </Link>
+      <TouchableOpacity onPress={Salvar} style={styles.botaoSalvar}>
+        <Text style={styles.botaoText}>Enviar denúncia</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
