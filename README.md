@@ -106,7 +106,7 @@ A solução oferece um canal seguro e simples para **denúncias anônimas e regi
 
 ## 🏫 Instituição
 **FIAP – Mobile App Development (2025)**  
-Prof. [Nome do Professor se desejar inserir]  
+Prof. Fernando Pinéo de Abreu🦤🦤
 Projeto desenvolvido como parte da disciplina de **Mobile Application Development**.
 
 ---
