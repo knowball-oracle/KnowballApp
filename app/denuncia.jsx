@@ -1,8 +1,10 @@
 import { Text, TextInput, StyleSheet, View, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
+import axios from "axios";
+
+const API_BASE = 'https://6909f3041a446bb9cc20b45c.mockapi.io';
 
 export default function Denuncia() {
   const { nome, email } = useLocalSearchParams();
@@ -18,16 +20,9 @@ export default function Denuncia() {
       return;
     }
 
-    let denuncias = [];
-
-    const dados = await AsyncStorage.getItem("DENUNCIAS");
-    if (dados !== null) {
-      denuncias = JSON.parse(dados);
-    }
-
     const protocolo = Math.floor(100000 + Math.random() * 900000).toString();
 
-    denuncias.push({
+    const novaDenuncia = {
       nome,
       email,
       categoria,
@@ -36,14 +31,23 @@ export default function Denuncia() {
       arbitro,
       relato,
       protocolo,
-    });
+    };
 
-    await AsyncStorage.setItem("DENUNCIAS", JSON.stringify(denuncias));
+    try {
+      await axios.post(`${API_BASE}/denuncias`, novaDenuncia, {
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-    router.push({
-      pathname: "/user",
-      params: { nome, protocolo }
-    });
+      Alert.alert("Sucesso", "Denúncia enviada com sucesso!");
+      
+      router.push({
+        pathname: "/user",
+        params: { nome, protocolo }
+      });
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Erro", "Falha ao enviar a denúncia.");
+    }
   }
 
   return (

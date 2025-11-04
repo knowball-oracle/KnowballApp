@@ -6,9 +6,20 @@ export default function Layout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#ff0000",
+        tabBarActiveTintColor: "#d62828",
         tabBarInactiveTintColor: "#808080",
-        tabBarStyle: { backgroundColor: "#ffffff", borderTopWidth: 0.3 },
+        tabBarStyle: { 
+          backgroundColor: "#1a1a1a", 
+          borderTopWidth: 1,
+          borderTopColor: "#333",
+          height: 60,
+          paddingBottom: 8,
+          paddingTop: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: "600",
+        },
       }}
     >
       <Tabs.Screen
@@ -16,17 +27,39 @@ export default function Layout() {
         options={{
           title: "Início",
           tabBarIcon: ({ focused, size }) => (
-            <Ionicons name="home-outline" color={focused ? "#d62828" : "#888"} size={size} />
+            <Ionicons 
+              name={focused ? "home" : "home-outline"} 
+              color={focused ? "#d62828" : "#888"} 
+              size={size} 
+            />
           ),
         }}
-
       />
+
+      <Tabs.Screen
+        name="auth"
+        options={{
+          title: "Protocolos",
+          tabBarIcon: ({ focused, size }) => (
+            <Ionicons 
+              name={focused ? "shield-checkmark" : "shield-checkmark-outline"} 
+              color={focused ? "#d62828" : "#888"} 
+              size={size} 
+            />
+          ),
+        }}
+      />
+
       <Tabs.Screen
         name="sobre"
         options={{
           title: "Sobre",
           tabBarIcon: ({ focused, size }) => (
-            <Ionicons name="information" color={focused ? "#d62828" : "#888"} size={size} />
+            <Ionicons 
+              name={focused ? "information-circle" : "information-circle-outline"} 
+              color={focused ? "#d62828" : "#888"} 
+              size={size} 
+            />
           ),
         }}
       />
@@ -34,10 +67,7 @@ export default function Layout() {
       <Tabs.Screen
         name="protocolo/[protocolo]"
         options={{
-          title: "Protocolo",
-          tabBarIcon: ({ focused, size }) => (
-            <Ionicons name="receipt-outline" color={focused ? "#d62828" : "#888"} size={size} />
-          ),
+          href: null,
         }}
       />
 
@@ -55,6 +85,12 @@ export default function Layout() {
         }}
       />
 
+      <Tabs.Screen
+        name="historico"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

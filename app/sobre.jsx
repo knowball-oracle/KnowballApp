@@ -25,7 +25,7 @@ export default function Sobre() {
       <View style={styles.row}>
 
         <View style={styles.member}>
-          <Image source={require("../assets/1732279396276.jpg")} style={styles.avatar} />
+          <Image source={require("../assets/1761361880310.jpg")} style={styles.avatar} />
           <Text style={styles.name}>Patrick Castro</Text>
           <View style={styles.icons}>
             <TouchableOpacity onPress={() => Linking.openURL("https://github.com/castropatrick")}>
