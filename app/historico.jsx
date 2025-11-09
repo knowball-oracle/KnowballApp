@@ -1,27 +1,30 @@
-import { Text, StyleSheet, View, FlatList, TouchableOpacity, Alert } from "react-native";
+import { Text, StyleSheet, View, FlatList, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState} from "react";
+import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
+import React from "react";
 import axios from "axios";
-
-import { API_BASE } from './constants';
+import { API_BASE } from "./constants";
 
 export default function Historico() {
   const [denuncias, setDenuncias] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  
   async function carregarDenuncias() {
+    setLoading(true);
     try {
       const response = await axios.get(`${API_BASE}/denuncias`);
       setDenuncias(response.data);
     } catch (error) {
       console.log("Erro ao buscar denúncias:", error);
-      Alert.alert("Erro", "Falha ao carregar denúncias");
+      if (error.response?.status !== 429) {
+        Alert.alert("Erro", "Falha ao carregar denúncias");
+      }
     }
+    setLoading(false);
   }
 
-  
   async function excluirDenuncia(id) {
     Alert.alert("Confirmar", "Deseja excluir esta denúncia?", [
       { text: "Cancelar" },
@@ -62,9 +65,22 @@ export default function Historico() {
     ]);
   }
 
-  useFocusEffect(() => {
-    carregarDenuncias();
-  });
+  useFocusEffect(
+    React.useCallback(() => {
+      carregarDenuncias();
+    }, [])
+  );
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="#d62828" />
+          <Text style={{ color: '#ccc', marginTop: 10 }}>Carregando...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -92,6 +108,8 @@ export default function Historico() {
         <FlatList
           data={denuncias}
           keyExtractor={(item) => item.id}
+          refreshing={loading}
+          onRefresh={carregarDenuncias}
           renderItem={({ item }) => (
             <View style={styles.card}>
               <View style={styles.cardHeader}>

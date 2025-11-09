@@ -65,13 +65,6 @@ export default function Layout() {
       />
 
       <Tabs.Screen
-        name="protocolo/[protocolo]"
-        options={{
-          href: null,
-        }}
-      />
-
-      <Tabs.Screen
         name="denuncia"
         options={{
           href: null,
