@@ -5,7 +5,7 @@ import { router, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 
-const API_BASE = 'https://6909f3041a446bb9cc20b45c.mockapi.io';
+import { API_BASE } from './constants';
 
 export default function Auth() {
   const [codigo, setCodigo] = useState("");

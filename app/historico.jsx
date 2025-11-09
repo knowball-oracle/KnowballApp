@@ -1,11 +1,11 @@
 import { Text, StyleSheet, View, FlatList, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState, useEffect } from "react";
+import { useState} from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import axios from "axios";
 
-const API_BASE = 'https://6909f3041a446bb9cc20b45c.mockapi.io';
+import { API_BASE } from './constants';
 
 export default function Historico() {
   const [denuncias, setDenuncias] = useState([]);
