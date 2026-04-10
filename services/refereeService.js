@@ -23,3 +23,9 @@ export async function atualizarArbitro(id, arbitro) {
 export async function excluirArbitro(id) {
   await api.delete(`/referees/${id}`);
 }
+
+export async function listarArbitrosPorPartida(gameId) {
+  const response = await api.get(`/refereeing/game/${gameId}`);
+  const lista = response.data._embedded?.refereeingList || [];
+  return lista.map((r) => r.referee);
+}

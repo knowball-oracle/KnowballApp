@@ -66,7 +66,7 @@ export default function Denuncia() {
       content: relato.trim(),
       date: new Date().toISOString().split("T")[0],
       status: "NEW",
-      analysisResult: "PENDING",
+      analysisResult: "NEUTRAL",
     });
   }
 
