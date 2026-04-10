@@ -1,82 +1,67 @@
 import { Text, StyleSheet, View, FlatList, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useFocusEffect } from "expo-router";
+import { router } from "expo-router";
 import React from "react";
-import axios from "axios";
-import { API_BASE } from "./constants";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { listarDenuncias, atualizarStatusDenuncia } from "../services/reportService";
+import { useAuth } from "../context/AuthContext";
 
 export default function Historico() {
-  const [denuncias, setDenuncias] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
+  const { token } = useAuth();
 
-  async function carregarDenuncias() {
-    setLoading(true);
-    try {
-      const response = await axios.get(`${API_BASE}/denuncias`);
-      setDenuncias(response.data);
-    } catch (error) {
-      console.log("Erro ao buscar denúncias:", error);
-      if (error.response?.status !== 429) {
-        Alert.alert("Erro", "Falha ao carregar denúncias");
-      }
-    }
-    setLoading(false);
-  }
+  const { data: denuncias = [], isLoading, refetch } = useQuery({
+    queryKey: ["denuncias"],
+    queryFn: listarDenuncias,
+    enabled: !!token,
+  });
 
-  async function excluirDenuncia(id) {
-    Alert.alert("Confirmar", "Deseja excluir esta denúncia?", [
+  const mutationStatus = useMutation({
+    mutationFn: ({ id, status }) => atualizarStatusDenuncia(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["denuncias"] });
+      Alert.alert("Sucesso", "Status atualizado!");
+    },
+    onError: () => {
+      Alert.alert("Erro", "Falha ao atualizar status");
+    },
+  });
+
+  function handleAtualizarStatus(id, statusAtual) {
+    const novoStatus =
+      statusAtual === "NEW"
+        ? "UNDER_ANALYSIS"
+        : statusAtual === "UNDER_ANALYSIS"
+        ? "RESOLVED"
+        : "NEW";
+
+    Alert.alert("Atualizar Status", `Mudar para: ${novoStatus}?`, [
       { text: "Cancelar" },
-      {
-        text: "Excluir",
-        onPress: async () => {
-          try {
-            await axios.delete(`${API_BASE}/denuncias/${id}`);
-            Alert.alert("Sucesso", "Denúncia excluída!");
-            carregarDenuncias();
-          } catch (error) {
-            console.log(error);
-            Alert.alert("Erro", "Falha ao excluir denúncia");
-          }
-        },
-      },
+      { text: "Confirmar", onPress: () => mutationStatus.mutate({ id, novoStatus }) },
     ]);
   }
 
-  async function limparTudo() {
-    Alert.alert("Confirmar", "Deseja excluir TODAS as denúncias?", [
-      { text: "Cancelar" },
-      {
-        text: "Excluir Tudo",
-        onPress: async () => {
-          try {
-            for (const denuncia of denuncias) {
-              await axios.delete(`${API_BASE}/denuncias/${denuncia.id}`);
-            }
-            Alert.alert("Sucesso", "Todas as denúncias foram removidas!");
-            setDenuncias([]);
-          } catch (error) {
-            console.log(error);
-            Alert.alert("Erro", "Falha ao limpar denúncias");
-          }
-        },
-      },
-    ]);
-  }
-
-  useFocusEffect(
-    React.useCallback(() => {
-      carregarDenuncias();
-    }, [])
-  );
-
-  if (loading) {
+  if (!token) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <View style={styles.vazio}>
+          <Ionicons name="lock-closed-outline" size={60} color="#444" />
+          <Text style={styles.vazioText}>Faça login para ver os protocolos</Text>
+          <TouchableOpacity style={styles.botaoNovo} onPress={() => router.push("/login")}>
+            <Text style={styles.botaoNovoText}>Fazer login</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
           <ActivityIndicator size="large" color="#d62828" />
-          <Text style={{ color: '#ccc', marginTop: 10 }}>Carregando...</Text>
+          <Text style={{ color: "#ccc", marginTop: 10 }}>Carregando...</Text>
         </View>
       </SafeAreaView>
     );
@@ -89,13 +74,6 @@ export default function Historico() {
         <Text style={styles.subtitle}>{denuncias.length} denúncia(s)</Text>
       </View>
 
-      {denuncias.length > 0 && (
-        <TouchableOpacity style={styles.botaoLimpar} onPress={limparTudo}>
-          <Ionicons name="trash-outline" size={18} color="#ff4444" />
-          <Text style={styles.botaoLimparText}>Limpar tudo</Text>
-        </TouchableOpacity>
-      )}
-
       {denuncias.length === 0 ? (
         <View style={styles.vazio}>
           <Ionicons name="document-text-outline" size={60} color="#444" />
@@ -107,29 +85,36 @@ export default function Historico() {
       ) : (
         <FlatList
           data={denuncias}
-          keyExtractor={(item) => item.id}
-          refreshing={loading}
-          onRefresh={carregarDenuncias}
+          keyExtractor={(item) => item.id.toString()}
+          refreshing={isLoading}
+          onRefresh={refetch}
           renderItem={({ item }) => (
             <View style={styles.card}>
               <View style={styles.cardHeader}>
                 <View>
-                  <Text style={styles.protocolo}>#{item.protocolo}</Text>
-                  <Text style={styles.categoria}>{item.categoria}</Text>
+                  <Text style={styles.protocolo}>#{item.protocol}</Text>
+                  <Text style={styles.categoria}>{item.game?.championship?.category}</Text>
                 </View>
-                <TouchableOpacity onPress={() => excluirDenuncia(item.id)}>
-                  <Ionicons name="trash-outline" size={20} color="#ff4444" />
-                </TouchableOpacity>
+                <View style={styles.statusBadge}>
+                  <Text style={styles.statusText}>{item.status}</Text>
+                </View>
               </View>
 
-              <Text style={styles.info}>Partida: {item.partida}</Text>
-              <Text style={styles.info}>Data: {item.data}</Text>
-              <Text style={styles.info}>Árbitro: {item.arbitro}</Text>
-              <Text style={styles.info}>Email: {item.email}</Text>
+              <Text style={styles.info}>Partida: {item.game?.place}</Text>
+              <Text style={styles.info}>Data: {item.date}</Text>
+              <Text style={styles.info}>Árbitro: {item.referee?.name}</Text>
+
+              <TouchableOpacity
+                style={styles.botaoStatus}
+                onPress={() => handleAtualizarStatus(item.id, item.status)}
+                disabled={mutationStatus.isPending}
+              >
+                <Text style={styles.botaoStatusText}>Atualizar status</Text>
+              </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.botaoVer}
-                onPress={() => Alert.alert("Relato Completo", item.relato)}
+                onPress={() => Alert.alert("Relato Completo", item.content)}
               >
                 <Text style={styles.botaoVerText}>Ver relato completo</Text>
               </TouchableOpacity>
@@ -161,21 +146,6 @@ const styles = StyleSheet.create({
     color: "#888",
     marginTop: 5,
   },
-  botaoLimpar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#1a1a1a",
-    marginHorizontal: 20,
-    padding: 12,
-    borderRadius: 8,
-    gap: 8,
-    marginBottom: 10,
-  },
-  botaoLimparText: {
-    color: "#ff4444",
-    fontWeight: "600",
-  },
   lista: {
     padding: 20,
   },
@@ -203,14 +173,37 @@ const styles = StyleSheet.create({
     color: "#fff",
     marginTop: 5,
   },
+  statusBadge: {
+    backgroundColor: "#333",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+    justifyContent: "center",
+  },
+  statusText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
+  },
   info: {
     color: "#ccc",
     fontSize: 14,
     marginBottom: 5,
   },
-  botaoVer: {
+  botaoStatus: {
     marginTop: 10,
-    paddingTop: 10,
+    backgroundColor: "#d62828",
+    padding: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  botaoStatusText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+  botaoVer: {
+    marginTop: 8,
+    paddingTop: 8,
     borderTopWidth: 1,
     borderTopColor: "#333",
   },
