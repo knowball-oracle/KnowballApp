@@ -5,7 +5,7 @@ import { router } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { criarDenuncia } from "../services/reportService";
 import { listarPartidas } from "../services/gameService";
-import { listarArbitros } from "../services/refereeService";
+import { listarArbitrosPorPartida } from "../services/refereeService";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 
@@ -26,15 +26,16 @@ export default function Denuncia() {
   });
 
   const { data: arbitros = [], isLoading: loadingArbitros } = useQuery({
-    queryKey: ["arbitros"],
-    queryFn: listarArbitros,
-    enabled: !!token,
+    queryKey: ["arbitrosPorPartida", gameId],
+    queryFn: () => listarArbitrosPorPartida(gameId),
+    enabled: !!gameId,
   });
 
   const mutation = useMutation({
     mutationFn: criarDenuncia,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["denuncias"] });
+      queryClient.invalidateQueries({ queryKey: ["arbitros"] });
       router.push({
         pathname: "/user",
         params: { nome: userName, protocolo: data.protocol || protocolo },
@@ -44,6 +45,11 @@ export default function Denuncia() {
       Alert.alert("Erro", "Falha ao enviar a denúncia.");
     },
   });
+
+  function handleSelecionarPartida(id) {
+    setGameId(id);
+    setRefereeId(null);
+  }
 
   function handleSalvar() {
     if (!gameId) {
@@ -88,12 +94,12 @@ export default function Denuncia() {
     );
   }
 
-  if (loadingPartidas || loadingArbitros) {
+  if (loadingPartidas) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: cores.fundo }]}>
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
           <ActivityIndicator size="large" color={cores.primario} />
-          <Text style={{ color: cores.textoSecundario, marginTop: 10 }}>Carregando dados...</Text>
+          <Text style={{ color: cores.textoSecundario, marginTop: 10 }}>Carregando partidas...</Text>
         </View>
       </SafeAreaView>
     );
@@ -118,7 +124,7 @@ export default function Denuncia() {
                   { backgroundColor: cores.fundoCard, borderColor: cores.borda },
                   gameId === p.id && { backgroundColor: cores.primario, borderColor: cores.primario },
                 ]}
-                onPress={() => setGameId(p.id)}
+                onPress={() => handleSelecionarPartida(p.id)}
               >
                 <Text style={[styles.chipTexto, { color: cores.texto }]}>
                   {p.place} — {p.championship?.category}
@@ -128,25 +134,33 @@ export default function Denuncia() {
           </ScrollView>
         )}
 
-        <Text style={[styles.label, { color: cores.textoSecundario }]}>Selecione o árbitro:</Text>
-        {arbitros.length === 0 ? (
-          <Text style={{ color: cores.textoMuted, marginBottom: 20 }}>Nenhum árbitro cadastrado</Text>
-        ) : (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollHorizontal}>
-            {arbitros.map((a) => (
-              <TouchableOpacity
-                key={a.id}
-                style={[
-                  styles.chipBotao,
-                  { backgroundColor: cores.fundoCard, borderColor: cores.borda },
-                  refereeId === a.id && { backgroundColor: cores.primario, borderColor: cores.primario },
-                ]}
-                onPress={() => setRefereeId(a.id)}
-              >
-                <Text style={[styles.chipTexto, { color: cores.texto }]}>{a.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+        {gameId && (
+          <>
+            <Text style={[styles.label, { color: cores.textoSecundario }]}>Selecione o árbitro:</Text>
+            {loadingArbitros ? (
+              <ActivityIndicator size="small" color={cores.primario} style={{ marginBottom: 20 }} />
+            ) : arbitros.length === 0 ? (
+              <Text style={{ color: cores.textoMuted, marginBottom: 20 }}>
+                Nenhum árbitro vinculado a esta partida
+              </Text>
+            ) : (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollHorizontal}>
+                {arbitros.map((a) => (
+                  <TouchableOpacity
+                    key={a.id}
+                    style={[
+                      styles.chipBotao,
+                      { backgroundColor: cores.fundoCard, borderColor: cores.borda },
+                      refereeId === a.id && { backgroundColor: cores.primario, borderColor: cores.primario },
+                    ]}
+                    onPress={() => setRefereeId(a.id)}
+                  >
+                    <Text style={[styles.chipTexto, { color: cores.texto }]}>{a.name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            )}
+          </>
         )}
 
         <TextInput
