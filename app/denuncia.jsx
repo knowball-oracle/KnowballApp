@@ -2,42 +2,55 @@ import { Text, TextInput, StyleSheet, View, TouchableOpacity, Alert, ScrollView,
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
-import axios from "axios";
-
-import { API_BASE } from './constants';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { criarDenuncia } from "../services/reportService";
+import { listarPartidas } from "../services/gameService";
+import { listarArbitros } from "../services/refereeService";
+import { useAuth } from "../context/AuthContext";
 
 export default function Denuncia() {
   const { nome, email } = useLocalSearchParams();
-  const [categoria, setCategoria] = useState("");
-  const [partida, setPartida] = useState("");
-  const [data, setData] = useState("");
-  const [arbitro, setArbitro] = useState("");
+  const { token } = useAuth();
+  const queryClient = useQueryClient();
+
+  const [gameId, setGameId] = useState(null);
+  const [refereeId, setRefereeId] = useState(null);
   const [relato, setRelato] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [protocolo] = useState(Math.floor(100000 + Math.random() * 900000).toString());
 
-  function validarData(data) {
-    const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
-    if (!regex.test(data)) return false;
-    const [_, dia, mes, ano] = data.match(regex);
-    const dataObj = new Date(ano, mes - 1, dia);
-    return dataObj.getFullYear() == ano && dataObj.getMonth() == mes - 1 && dataObj.getDate() == dia;
-  }
+  const { data: partidas = [], isLoading: loadingPartidas } = useQuery({
+    queryKey: ["partidas"],
+    queryFn: listarPartidas,
+    enabled: !!token,
+  });
 
-  async function Salvar() {
-    if (!categoria) {
-      Alert.alert("Atenção", "Selecione uma categoria");
+  const { data: arbitros = [], isLoading: loadingArbitros } = useQuery({
+    queryKey: ["arbitros"],
+    queryFn: listarArbitros,
+    enabled: !!token,
+  });
+
+  const mutation = useMutation({
+    mutationFn: criarDenuncia,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["denuncias"] });
+      router.push({
+        pathname: "/user",
+        params: { nome, protocolo: data.protocol || protocolo },
+      });
+    },
+    onError: () => {
+      Alert.alert("Erro", "Falha ao enviar a denúncia.");
+    },
+  });
+
+  function handleSalvar() {
+    if (!gameId) {
+      Alert.alert("Atenção", "Selecione uma partida");
       return;
     }
-    if (!partida.trim()) {
-      Alert.alert("Atenção", "Preencha a partida");
-      return;
-    }
-    if (!validarData(data)) {
-      Alert.alert("Atenção", "Data inválida. Use DD/MM/AAAA");
-      return;
-    }
-    if (!arbitro.trim()) {
-      Alert.alert("Atenção", "Preencha o árbitro");
+    if (!refereeId) {
+      Alert.alert("Atenção", "Selecione um árbitro");
       return;
     }
     if (!relato.trim() || relato.trim().length < 20) {
@@ -45,36 +58,39 @@ export default function Denuncia() {
       return;
     }
 
-    setLoading(true);
-    const protocolo = Math.floor(100000 + Math.random() * 900000).toString();
+    mutation.mutate({
+      game: { id: gameId },
+      referee: { id: refereeId },
+      protocol: protocolo,
+      content: relato.trim(),
+      date: new Date().toISOString().split("T")[0],
+      status: "NEW",
+      analysisResult: "PENDING",
+    });
+  }
 
-    const novaDenuncia = {
-      nome,
-      email,
-      categoria,
-      partida: partida.trim(),
-      data: data.trim(),
-      arbitro: arbitro.trim(),
-      relato: relato.trim(),
-      protocolo,
-      dataEnvio: new Date().toISOString(),
-    };
+  if (!token) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.vazio}>
+          <Text style={styles.vazioText}>Faça login para enviar uma denúncia</Text>
+          <TouchableOpacity style={styles.botao} onPress={() => router.push("/login")}>
+            <Text style={styles.botaoText}>Fazer login</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
-    try {
-      await axios.post(`${API_BASE}/denuncias`, novaDenuncia, {
-        headers: { 'Content-Type': 'application/json' }
-      });
-      setLoading(false);
-      Alert.alert("Sucesso", "Denúncia enviada com sucesso!");
-      router.push({
-        pathname: "/user",
-        params: { nome, protocolo }
-      });
-    } catch (error) {
-      setLoading(false);
-      console.log(error);
-      Alert.alert("Erro", "Falha ao enviar a denúncia.");
-    }
+  if (loadingPartidas || loadingArbitros) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <ActivityIndicator size="large" color="#d62828" />
+          <Text style={{ color: "#ccc", marginTop: 10 }}>Carregando dados...</Text>
+        </View>
+      </SafeAreaView>
+    );
   }
 
   return (
@@ -83,51 +99,34 @@ export default function Denuncia() {
         <Text style={styles.title}>Formulário de Denúncia</Text>
         <Text style={styles.usuario}>Denunciante: {nome}</Text>
 
-        <Text style={styles.label}>Categoria de base: <Text style={styles.categoriaSelecionadaTexto}>{categoria || "Nenhuma"}</Text></Text>
+        <Text style={styles.label}>Selecione a partida:</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollHorizontal}>
+          {partidas.map((p) => (
+            <TouchableOpacity
+              key={p.id}
+              style={[styles.chipBotao, gameId === p.id && styles.chipSelecionado]}
+              onPress={() => setGameId(p.id)}
+            >
+              <Text style={styles.chipTexto}>{p.place} — {p.championship?.category}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
 
-        <View style={styles.categoriaContainer}>
-          <TouchableOpacity style={styles.categoriaBotao} onPress={() => setCategoria("Sub-13")}>
-            <Text style={styles.categoriaTexto}>Sub-13</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.categoriaBotao} onPress={() => setCategoria("Sub-15")}>
-            <Text style={styles.categoriaTexto}>Sub-15</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.categoriaBotao} onPress={() => setCategoria("Sub-17")}>
-            <Text style={styles.categoriaTexto}>Sub-17</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.categoriaBotao} onPress={() => setCategoria("Sub-20")}>
-            <Text style={styles.categoriaTexto}>Sub-20</Text>
-          </TouchableOpacity>
-        </View>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Partida (ex: Corinthians x Palmeiras)"
-          placeholderTextColor="#888"
-          value={partida}
-          onChangeText={setPartida}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Data da partida (DD/MM/AAAA)"
-          placeholderTextColor="#888"
-          value={data}
-          onChangeText={setData}
-          keyboardType="numeric"
-          maxLength={10}
-        />
+        <Text style={styles.label}>Selecione o árbitro:</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollHorizontal}>
+          {arbitros.map((a) => (
+            <TouchableOpacity
+              key={a.id}
+              style={[styles.chipBotao, refereeId === a.id && styles.chipSelecionado]}
+              onPress={() => setRefereeId(a.id)}
+            >
+              <Text style={styles.chipTexto}>{a.name}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
 
         <TextInput
-          style={styles.input}
-          placeholder="Árbitro"
-          placeholderTextColor="#888"
-          value={arbitro}
-          onChangeText={setArbitro}
-        />
-
-        <TextInput
-          style={[styles.input, { height: 100 }]}
+          style={[styles.input, { height: 120 }]}
           placeholder="Relato da denúncia (mínimo 20 caracteres)"
           placeholderTextColor="#888"
           value={relato}
@@ -137,8 +136,12 @@ export default function Denuncia() {
         />
         <Text style={styles.contador}>{relato.length} caracteres</Text>
 
-        <TouchableOpacity onPress={Salvar} style={styles.botaoSalvar} disabled={loading}>
-          {loading ? (
+        <TouchableOpacity
+          onPress={handleSalvar}
+          style={styles.botao}
+          disabled={mutation.isPending}
+        >
+          {mutation.isPending ? (
             <ActivityIndicator color="#fff" />
           ) : (
             <Text style={styles.botaoText}>Enviar denúncia</Text>
@@ -172,13 +175,34 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#ccc",
     marginBottom: 10,
+    marginTop: 10,
+  },
+  scrollHorizontal: {
+    marginBottom: 20,
+  },
+  chipBotao: {
+    backgroundColor: "#1a1a1a",
+    padding: 10,
+    borderRadius: 8,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: "#333",
+  },
+  chipSelecionado: {
+    backgroundColor: "#d62828",
+    borderColor: "#d62828",
+  },
+  chipTexto: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 13,
   },
   input: {
     backgroundColor: "#1a1a1a",
     color: "#fff",
     padding: 15,
     borderRadius: 8,
-    marginBottom: 15,
+    marginBottom: 5,
     borderWidth: 1,
     borderColor: "#333",
   },
@@ -186,29 +210,9 @@ const styles = StyleSheet.create({
     color: "#666",
     fontSize: 12,
     textAlign: "right",
-    marginTop: -10,
     marginBottom: 15,
   },
-  categoriaContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginBottom: 20,
-    gap: 10,
-  },
-  categoriaBotao: {
-    backgroundColor: "#D62828",
-    padding: 10,
-    borderRadius: 8,
-  },
-  categoriaSelecionadaTexto: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  categoriaTexto: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  botaoSalvar: {
+  botao: {
     backgroundColor: "#d62828",
     padding: 16,
     borderRadius: 8,
@@ -219,5 +223,17 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
+  },
+  vazio: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 40,
+  },
+  vazioText: {
+    color: "#ccc",
+    fontSize: 16,
+    marginBottom: 30,
+    textAlign: "center",
   },
 });
