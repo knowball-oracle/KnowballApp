@@ -33,7 +33,7 @@ export default function Register() {
       setToken(data.token);
       setUserName(data.name);
       setUserRole(data.role);
-      router.replace("/");
+      router.replace("/auth");
     } catch (error) {
       Alert.alert("Erro", "Não foi possível criar a conta. E-mail já cadastrado.");
     } finally {

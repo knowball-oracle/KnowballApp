@@ -1,33 +1,67 @@
-import { Text, TextInput, StyleSheet, Image, View, Alert, TouchableOpacity } from "react-native";
+import { Text, StyleSheet, Image, View, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import { useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function Home() {
-  const [nome, setNome] = useState("");
-  const [email, setEmail] = useState("");
+  const { cores } = useTheme();
+  const { token, userName, isAdmin } = useAuth();
 
-  function validarEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  }
+  if (token) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: cores.fundo }]}>
+        <View style={styles.logoContainer}>
+          <Image
+            source={require("../assets/knowball-oracle.png")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </View>
 
-  function handleContinuar() {
-    if (!nome.trim() || nome.trim().length < 3) {
-      Alert.alert("Atenção", "Nome deve ter pelo menos 3 caracteres");
-      return;
-    }
-    if (!validarEmail(email)) {
-      Alert.alert("Atenção", "E-mail inválido");
-      return;
-    }
-    router.push({
-      pathname: "/denuncia",
-      params: { nome: nome.trim(), email: email.trim() },
-    });
+        <Text style={[styles.bemVindo, { color: cores.texto }]}>
+          Olá, {userName}!
+        </Text>
+        <Text style={[styles.subtitle, { color: cores.textoSecundario }]}>
+          Combate à manipulação no futebol brasileiro masculino nas categorias de base
+        </Text>
+
+        <TouchableOpacity
+          style={[styles.botaoPrimario, { backgroundColor: cores.primario }]}
+          onPress={() => router.push("/denuncia")}
+        >
+          <Ionicons name="warning-outline" size={22} color="#fff" />
+          <Text style={styles.botaoPrimarioText}>Fazer uma denúncia</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.botaoSecundario, { borderColor: cores.borda }]}
+          onPress={() => router.push("/historico")}
+        >
+          <Ionicons name="document-text-outline" size={22} color={cores.primario} />
+          <Text style={[styles.botaoSecundarioText, { color: cores.primario }]}>
+            Meus protocolos
+          </Text>
+        </TouchableOpacity>
+
+        {isAdmin() && (
+          <TouchableOpacity
+            style={[styles.botaoAdmin, { backgroundColor: "#1a1a1a", borderColor: cores.borda }]}
+            onPress={() => router.push("/arbitros")}
+          >
+            <Ionicons name="people-outline" size={22} color={cores.textoMuted} />
+            <Text style={[styles.botaoAdminText, { color: cores.textoMuted }]}>
+              Gerenciar árbitros
+            </Text>
+          </TouchableOpacity>
+        )}
+      </SafeAreaView>
+    );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: cores.fundo }]}>
       <View style={styles.logoContainer}>
         <Image
           source={require("../assets/knowball-oracle.png")}
@@ -36,31 +70,33 @@ export default function Home() {
         />
       </View>
 
-      <Text style={styles.subtitle}>
+      <Text style={[styles.subtitle, { color: cores.textoSecundario }]}>
         Combate à manipulação no futebol brasileiro masculino nas categorias de base
       </Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Digite seu nome"
-        placeholderTextColor="#888"
-        value={nome}
-        onChangeText={setNome}
-      />
+      <View style={styles.botoesContainer}>
+        <TouchableOpacity
+          style={[styles.botaoPrimario, { backgroundColor: cores.primario }]}
+          onPress={() => router.push("/login")}
+        >
+          <Ionicons name="warning-outline" size={22} color="#fff" />
+          <Text style={styles.botaoPrimarioText}>Quero fazer uma denúncia</Text>
+        </TouchableOpacity>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Digite seu e-mail"
-        placeholderTextColor="#888"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
+        <TouchableOpacity
+          style={[styles.botaoSecundario, { borderColor: cores.borda }]}
+          onPress={() => router.push("/login")}
+        >
+          <Ionicons name="shield-checkmark-outline" size={22} color={cores.primario} />
+          <Text style={[styles.botaoSecundarioText, { color: cores.primario }]}>
+            Área administrativa
+          </Text>
+        </TouchableOpacity>
+      </View>
 
-      <TouchableOpacity style={styles.botao} onPress={handleContinuar}>
-        <Text style={styles.botaoTexto}>Continuar</Text>
-      </TouchableOpacity>
+      <Text style={[styles.rodape, { color: cores.textoMuted }]}>
+        Sua identidade é protegida pelo protocolo de denúncia
+      </Text>
     </SafeAreaView>
   );
 }
@@ -70,7 +106,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 24,
     justifyContent: "center",
-    backgroundColor: "#111111",
   },
   logoContainer: {
     alignItems: "center",
@@ -80,31 +115,67 @@ const styles = StyleSheet.create({
     width: 350,
     height: 120,
   },
+  bemVindo: {
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 10,
+  },
   subtitle: {
-    fontSize: 17,
-    color: "#ccc",
-    marginBottom: 25,
+    fontSize: 16,
+    marginBottom: 40,
     lineHeight: 23,
     textAlign: "center",
   },
-  input: {
-    backgroundColor: "#1a1a1a",
-    color: "#fff",
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: "#333",
+  botoesContainer: {
+    width: "100%",
+    gap: 15,
   },
-  botao: {
-    backgroundColor: "#d62828",
-    padding: 16,
-    borderRadius: 8,
+  botaoPrimario: {
+    flexDirection: "row",
+    padding: 18,
+    borderRadius: 12,
     alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    marginBottom: 15,
   },
-  botaoTexto: {
+  botaoPrimarioText: {
     color: "#fff",
-    fontSize: 16,
     fontWeight: "bold",
+    fontSize: 16,
+  },
+  botaoSecundario: {
+    flexDirection: "row",
+    padding: 18,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    borderWidth: 1,
+    marginBottom: 15,
+  },
+  botaoSecundarioText: {
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  botaoAdmin: {
+    flexDirection: "row",
+    padding: 18,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    borderWidth: 1,
+    marginBottom: 15,
+  },
+  botaoAdminText: {
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  rodape: {
+    fontSize: 13,
+    textAlign: "center",
+    marginTop: 20,
   },
 });

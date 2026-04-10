@@ -28,7 +28,7 @@ export default function Login() {
       setToken(data.token);
       setUserName(data.name);
       setUserRole(data.role);
-      router.replace("/");
+      router.replace("/auth");
     } catch (error) {
       Alert.alert("Erro", "E-mail ou senha inválidos");
     } finally {
