@@ -1,81 +1,90 @@
-import { Text, TextInput, StyleSheet, View, TouchableOpacity, Alert } from "react-native";
+import { Text, StyleSheet, View, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from "react";
-import { router, useFocusEffect } from "expo-router";
+import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import axios from "axios";
-
-import { API_BASE } from './constants';
+import { useQuery } from "@tanstack/react-query";
+import { listarDenuncias } from "../services/reportService";
+import { useAuth } from "../context/AuthContext";
 
 export default function Auth() {
-  const [codigo, setCodigo] = useState("");
-  const [temDenuncias, setTemDenuncias] = useState(false);
+  const { token, userName, isAdmin, fazerLogout } = useAuth();
 
-  const CODIGO_CORRETO = "1234";
-
-  async function verificarDenuncias() {
-    try {
-      const response = await axios.get(`${API_BASE}/denuncias`);
-      if (response.data.length > 0) {
-        setTemDenuncias(true);
-      } else {
-        router.push("/historico");
-      }
-    } catch (error) {
-      console.log(error);
-      router.push("/historico");
-    }
-  }
-
-  useFocusEffect(() => {
-    verificarDenuncias();
+  const { data: denuncias = [], isLoading } = useQuery({
+    queryKey: ["denuncias"],
+    queryFn: listarDenuncias,
+    enabled: !!token,
   });
 
-  function verificarCodigo() {
-    if (codigo === CODIGO_CORRETO) {
-      Alert.alert("Acesso Liberado", "Bem-vindo!");
-      setCodigo("");
-      router.push("/historico");
-    } else {
-      Alert.alert("Acesso Negado", "Código incorreto!");
-      setCodigo("");
-    }
+  if (!token) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <Ionicons name="shield-checkmark" size={80} color="#d62828" />
+          <Text style={styles.title}>Área Restrita</Text>
+          <Text style={styles.subtitle}>
+            Faça login para acessar os protocolos
+          </Text>
+        </View>
+
+        <TouchableOpacity style={styles.botao} onPress={() => router.push("/login")}>
+          <Text style={styles.botaoText}>Fazer login</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.botaoSecundario} onPress={() => router.push("/register")}>
+          <Text style={styles.botaoSecundarioText}>Criar conta</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
   }
 
-  if (!temDenuncias) {
-    return null;
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <ActivityIndicator size="large" color="#d62828" />
+          <Text style={{ color: "#ccc", marginTop: 10 }}>Carregando...</Text>
+        </View>
+      </SafeAreaView>
+    );
   }
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Ionicons name="shield-checkmark" size={80} color="#d62828" />
-        <Text style={styles.title}>Área Restrita</Text>
-        <Text style={styles.subtitle}>
-          Digite o código para acessar os protocolos
-        </Text>
+        <Text style={styles.title}>Bem-vindo!</Text>
+        <Text style={styles.subtitle}>{userName}</Text>
+        {isAdmin() && (
+          <View style={styles.adminBadge}>
+            <Text style={styles.adminBadgeText}>ADMINISTRADOR</Text>
+          </View>
+        )}
       </View>
 
-      <View style={styles.form}>
-        <TextInput
-          style={styles.input}
-          placeholder="Código (1234)"
-          value={codigo}
-          onChangeText={setCodigo}
-          keyboardType="number-pad"
-          maxLength={4}
-          secureTextEntry
-          placeholderTextColor="#555"
-        />
+      <View style={styles.statsCard}>
+        <Text style={styles.statsNumero}>{denuncias.length}</Text>
+        <Text style={styles.statsLabel}>Denúncias registradas</Text>
+      </View>
 
-        <TouchableOpacity onPress={verificarCodigo} style={styles.botao}>
-          <Text style={styles.botaoText}>Acessar</Text>
+      <TouchableOpacity style={styles.botao} onPress={() => router.push("/historico")}>
+        <Ionicons name="document-text-outline" size={20} color="#fff" />
+        <Text style={styles.botaoText}>Ver protocolos</Text>
+      </TouchableOpacity>
+
+      {isAdmin() && (
+        <TouchableOpacity style={styles.botao} onPress={() => router.push("/arbitros")}>
+          <Ionicons name="people-outline" size={20} color="#fff" />
+          <Text style={styles.botaoText}>Gerenciar árbitros</Text>
         </TouchableOpacity>
-      </View>
+      )}
 
-      <View style={styles.info}>
-        <Text style={styles.infoText}>Código de demonstração: 1234</Text>
-      </View>
+      <TouchableOpacity style={styles.botaoLogout} onPress={async () => {
+        await fazerLogout();
+        Alert.alert("Logout", "Sessão encerrada com sucesso!");
+      }}>
+        <Ionicons name="log-out-outline" size={20} color="#ff4444" />
+        <Text style={styles.botaoLogoutText}>Sair</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -89,7 +98,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: "center",
-    marginBottom: 50,
+    marginBottom: 40,
   },
   title: {
     fontSize: 26,
@@ -103,41 +112,79 @@ const styles = StyleSheet.create({
     color: "#ccc",
     textAlign: "center",
   },
-  form: {
-    width: "100%",
+  adminBadge: {
+    marginTop: 10,
+    backgroundColor: "#d62828",
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 20,
   },
-  input: {
-    backgroundColor: "#1a1a1a",
+  adminBadgeText: {
     color: "#fff",
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+  statsCard: {
+    backgroundColor: "#1a1a1a",
+    borderRadius: 12,
     padding: 20,
-    borderRadius: 10,
-    marginBottom: 20,
-    fontSize: 24,
-    textAlign: "center",
-    letterSpacing: 10,
-    borderWidth: 2,
+    alignItems: "center",
+    marginBottom: 30,
+    borderWidth: 1,
     borderColor: "#333",
   },
+  statsNumero: {
+    fontSize: 48,
+    fontWeight: "bold",
+    color: "#d62828",
+  },
+  statsLabel: {
+    fontSize: 14,
+    color: "#888",
+    marginTop: 5,
+  },
   botao: {
+    flexDirection: "row",
     backgroundColor: "#d62828",
-    padding: 18,
+    padding: 16,
     borderRadius: 10,
     alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginBottom: 12,
   },
   botaoText: {
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
   },
-  info: {
-    marginTop: 30,
-    padding: 15,
-    backgroundColor: "#1a1a1a",
+  botaoSecundario: {
+    padding: 16,
     borderRadius: 10,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#333",
+    marginBottom: 12,
   },
-  infoText: {
+  botaoSecundarioText: {
     color: "#888",
-    fontSize: 13,
-    textAlign: "center",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  botaoLogout: {
+    flexDirection: "row",
+    padding: 16,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderWidth: 1,
+    borderColor: "#333",
+    marginTop: 10,
+  },
+  botaoLogoutText: {
+    color: "#ff4444",
+    fontWeight: "600",
+    fontSize: 16,
   },
 });
