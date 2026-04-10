@@ -55,6 +55,20 @@ export default function Layout() {
           />
 
           <Tabs.Screen
+            name="arbitros"
+            options={{
+              title: "Árbitros",
+              tabBarIcon: ({ focused, size }) => (
+                <Ionicons
+                  name={focused ? "people" : "people-outline"}
+                  color={focused ? "#d62828" : "#888"}
+                  size={size}
+                />
+              ),
+            }}
+          />
+
+          <Tabs.Screen
             name="sobre"
             options={{
               title: "Sobre",
@@ -73,7 +87,6 @@ export default function Layout() {
           <Tabs.Screen name="historico" options={{ href: null }} />
           <Tabs.Screen name="login" options={{ href: null }} />
           <Tabs.Screen name="register" options={{ href: null }} />
-          <Tabs.Screen name="arbitros" options={{ href: null }} />
           <Tabs.Screen name="apex" options={{ href: null }} />
         </Tabs>
       </QueryProvider>
