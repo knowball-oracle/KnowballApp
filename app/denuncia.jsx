@@ -1,22 +1,23 @@
 import { Text, TextInput, StyleSheet, View, TouchableOpacity, Alert, ScrollView, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
-import { router, useLocalSearchParams } from "expo-router";
+import { router } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { criarDenuncia } from "../services/reportService";
 import { listarPartidas } from "../services/gameService";
 import { listarArbitros } from "../services/refereeService";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 
 export default function Denuncia() {
-  const { nome, email } = useLocalSearchParams();
-  const { token } = useAuth();
+  const { token, userName } = useAuth();
+  const { cores } = useTheme();
   const queryClient = useQueryClient();
 
   const [gameId, setGameId] = useState(null);
   const [refereeId, setRefereeId] = useState(null);
   const [relato, setRelato] = useState("");
-  const [protocolo] = useState(Math.floor(100000 + Math.random() * 900000).toString());
+  const protocolo = Math.floor(100000 + Math.random() * 900000).toString();
 
   const { data: partidas = [], isLoading: loadingPartidas } = useQuery({
     queryKey: ["partidas"],
@@ -36,7 +37,7 @@ export default function Denuncia() {
       queryClient.invalidateQueries({ queryKey: ["denuncias"] });
       router.push({
         pathname: "/user",
-        params: { nome, protocolo: data.protocol || protocolo },
+        params: { nome: userName, protocolo: data.protocol || protocolo },
       });
     },
     onError: () => {
@@ -71,10 +72,15 @@ export default function Denuncia() {
 
   if (!token) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: cores.fundo }]}>
         <View style={styles.vazio}>
-          <Text style={styles.vazioText}>Faça login para enviar uma denúncia</Text>
-          <TouchableOpacity style={styles.botao} onPress={() => router.push("/login")}>
+          <Text style={[styles.vazioText, { color: cores.textoSecundario }]}>
+            Faça login para enviar uma denúncia
+          </Text>
+          <TouchableOpacity
+            style={[styles.botao, { backgroundColor: cores.primario }]}
+            onPress={() => router.push("/login")}
+          >
             <Text style={styles.botaoText}>Fazer login</Text>
           </TouchableOpacity>
         </View>
@@ -84,61 +90,79 @@ export default function Denuncia() {
 
   if (loadingPartidas || loadingArbitros) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: cores.fundo }]}>
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-          <ActivityIndicator size="large" color="#d62828" />
-          <Text style={{ color: "#ccc", marginTop: 10 }}>Carregando dados...</Text>
+          <ActivityIndicator size="large" color={cores.primario} />
+          <Text style={{ color: cores.textoSecundario, marginTop: 10 }}>Carregando dados...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: cores.fundo }]}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>Formulário de Denúncia</Text>
-        <Text style={styles.usuario}>Denunciante: {nome}</Text>
+        <Text style={[styles.title, { color: cores.texto }]}>Formulário de Denúncia</Text>
+        <Text style={[styles.usuario, { color: cores.textoMuted }]}>Denunciante: {userName}</Text>
 
-        <Text style={styles.label}>Selecione a partida:</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollHorizontal}>
-          {partidas.map((p) => (
-            <TouchableOpacity
-              key={p.id}
-              style={[styles.chipBotao, gameId === p.id && styles.chipSelecionado]}
-              onPress={() => setGameId(p.id)}
-            >
-              <Text style={styles.chipTexto}>{p.place} — {p.championship?.category}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+        <Text style={[styles.label, { color: cores.textoSecundario }]}>Selecione a partida:</Text>
+        {partidas.length === 0 ? (
+          <Text style={{ color: cores.textoMuted, marginBottom: 20 }}>Nenhuma partida cadastrada</Text>
+        ) : (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollHorizontal}>
+            {partidas.map((p) => (
+              <TouchableOpacity
+                key={p.id}
+                style={[
+                  styles.chipBotao,
+                  { backgroundColor: cores.fundoCard, borderColor: cores.borda },
+                  gameId === p.id && { backgroundColor: cores.primario, borderColor: cores.primario },
+                ]}
+                onPress={() => setGameId(p.id)}
+              >
+                <Text style={[styles.chipTexto, { color: cores.texto }]}>
+                  {p.place} — {p.championship?.category}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        )}
 
-        <Text style={styles.label}>Selecione o árbitro:</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollHorizontal}>
-          {arbitros.map((a) => (
-            <TouchableOpacity
-              key={a.id}
-              style={[styles.chipBotao, refereeId === a.id && styles.chipSelecionado]}
-              onPress={() => setRefereeId(a.id)}
-            >
-              <Text style={styles.chipTexto}>{a.name}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+        <Text style={[styles.label, { color: cores.textoSecundario }]}>Selecione o árbitro:</Text>
+        {arbitros.length === 0 ? (
+          <Text style={{ color: cores.textoMuted, marginBottom: 20 }}>Nenhum árbitro cadastrado</Text>
+        ) : (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollHorizontal}>
+            {arbitros.map((a) => (
+              <TouchableOpacity
+                key={a.id}
+                style={[
+                  styles.chipBotao,
+                  { backgroundColor: cores.fundoCard, borderColor: cores.borda },
+                  refereeId === a.id && { backgroundColor: cores.primario, borderColor: cores.primario },
+                ]}
+                onPress={() => setRefereeId(a.id)}
+              >
+                <Text style={[styles.chipTexto, { color: cores.texto }]}>{a.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        )}
 
         <TextInput
-          style={[styles.input, { height: 120 }]}
+          style={[styles.input, { backgroundColor: cores.input, color: cores.texto, borderColor: cores.borda }]}
           placeholder="Relato da denúncia (mínimo 20 caracteres)"
-          placeholderTextColor="#888"
+          placeholderTextColor={cores.textoMuted}
           value={relato}
           onChangeText={setRelato}
           multiline
           textAlignVertical="top"
         />
-        <Text style={styles.contador}>{relato.length} caracteres</Text>
+        <Text style={[styles.contador, { color: cores.textoMuted }]}>{relato.length} caracteres</Text>
 
         <TouchableOpacity
           onPress={handleSalvar}
-          style={styles.botao}
+          style={[styles.botao, { backgroundColor: cores.primario }]}
           disabled={mutation.isPending}
         >
           {mutation.isPending ? (
@@ -156,24 +180,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 24,
-    backgroundColor: "#111",
   },
   title: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#fff",
     marginBottom: 5,
     textAlign: "center",
   },
   usuario: {
     fontSize: 14,
-    color: "#888",
     marginBottom: 20,
     textAlign: "center",
   },
   label: {
     fontSize: 16,
-    color: "#ccc",
     marginBottom: 10,
     marginTop: 10,
   },
@@ -181,39 +201,28 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   chipBotao: {
-    backgroundColor: "#1a1a1a",
     padding: 10,
     borderRadius: 8,
     marginRight: 10,
     borderWidth: 1,
-    borderColor: "#333",
-  },
-  chipSelecionado: {
-    backgroundColor: "#d62828",
-    borderColor: "#d62828",
   },
   chipTexto: {
-    color: "#fff",
     fontWeight: "bold",
     fontSize: 13,
   },
   input: {
-    backgroundColor: "#1a1a1a",
-    color: "#fff",
     padding: 15,
     borderRadius: 8,
     marginBottom: 5,
     borderWidth: 1,
-    borderColor: "#333",
+    height: 120,
   },
   contador: {
-    color: "#666",
     fontSize: 12,
     textAlign: "right",
     marginBottom: 15,
   },
   botao: {
-    backgroundColor: "#d62828",
     padding: 16,
     borderRadius: 8,
     alignItems: "center",
@@ -231,7 +240,6 @@ const styles = StyleSheet.create({
     padding: 40,
   },
   vazioText: {
-    color: "#ccc",
     fontSize: 16,
     marginBottom: 30,
     textAlign: "center",
