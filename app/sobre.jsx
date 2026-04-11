@@ -1,4 +1,11 @@
-import { Text, StyleSheet, View, Image, TouchableOpacity, Linking } from "react-native";
+import {
+  Text,
+  StyleSheet,
+  View,
+  Image,
+  TouchableOpacity,
+  Linking,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
@@ -15,7 +22,10 @@ export default function Sobre() {
       />
 
       <TouchableOpacity
-        style={[styles.botaoTema, { backgroundColor: cores.fundoCard, borderColor: cores.borda }]}
+        style={[
+          styles.botaoTema,
+          { backgroundColor: cores.fundoCard, borderColor: cores.borda },
+        ]}
         onPress={alternarTema}
       >
         <Ionicons
@@ -30,57 +40,107 @@ export default function Sobre() {
 
       <Text style={[styles.title, { color: cores.texto }]}>Sobre o App</Text>
       <Text style={[styles.text, { color: cores.textoSecundario }]}>
-        O Knowball é uma aplicação criada para combater manipulações e fraudes no futebol brasileiro
-        masculino nas categorias de base, permitindo denúncias seguras.
-
-        Essas manipulações podem incluir suborno de árbitros, conluio entre equipes, pressão indevida à atletas e acerto de placares.
-        Tal situação ameaça a integridade dos campeonatos, reduz a motivação dos jovens atletas e compromete a credibilidade dos clubes.
+        O Knowball é uma aplicação criada para combater manipulações e fraudes
+        no futebol brasileiro masculino nas categorias de base, permitindo
+        denúncias seguras. Essas manipulações podem incluir suborno de árbitros,
+        conluio entre equipes, pressão indevida à atletas e acerto de placares.
+        Tal situação ameaça a integridade dos campeonatos, reduz a motivação dos
+        jovens atletas e compromete a credibilidade dos clubes.
       </Text>
 
-      <Text style={[styles.subtitle, { color: cores.primario }]}>Equipe de Desenvolvimento</Text>
+      <Text style={[styles.subtitle, { color: cores.primario }]}>
+        Equipe de Desenvolvimento
+      </Text>
 
       <View style={styles.row}>
         <View style={styles.member}>
-          <Image source={require("../assets/1761361880310.jpg")} style={styles.avatar} />
-          <Text style={[styles.name, { color: cores.texto }]}>Patrick Castro</Text>
+          <Image
+            source={require("../assets/1761361880310.jpg")}
+            style={styles.avatar}
+          />
+          <Text style={[styles.name, { color: cores.texto }]}>
+            Patrick Castro
+          </Text>
           <View style={styles.icons}>
-            <TouchableOpacity onPress={() => Linking.openURL("https://github.com/castropatrick")}>
+            <TouchableOpacity
+              onPress={() =>
+                Linking.openURL("https://github.com/castropatrick")
+              }
+            >
               <Ionicons name="logo-github" size={20} color={cores.texto} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => Linking.openURL("https://www.linkedin.com/in/patrick-castro-839aa2273/")}>
+            <TouchableOpacity
+              onPress={() =>
+                Linking.openURL(
+                  "https://www.linkedin.com/in/patrick-castro-839aa2273/",
+                )
+              }
+            >
               <Ionicons name="logo-linkedin" size={20} color="#0e76a8" />
             </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.member}>
-          <Image source={require("../assets/1760106364040.png")} style={styles.avatar} />
-          <Text style={[styles.name, { color: cores.texto }]}>Gabriel Rossi</Text>
+          <Image
+            source={require("../assets/1760106364040.png")}
+            style={styles.avatar}
+          />
+          <Text style={[styles.name, { color: cores.texto }]}>
+            Gabriel Rossi
+          </Text>
           <View style={styles.icons}>
-            <TouchableOpacity onPress={() => Linking.openURL("https://github.com/GabrielRossi01")}>
+            <TouchableOpacity
+              onPress={() =>
+                Linking.openURL("https://github.com/GabrielRossi01")
+              }
+            >
               <Ionicons name="logo-github" size={20} color={cores.texto} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => Linking.openURL("https://www.linkedin.com/in/gabriel-oliveira-rossi-155baa324/")}>
+            <TouchableOpacity
+              onPress={() =>
+                Linking.openURL(
+                  "https://www.linkedin.com/in/gabriel-oliveira-rossi-155baa324/",
+                )
+              }
+            >
               <Ionicons name="logo-linkedin" size={20} color="#0e76a8" />
             </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.member}>
-          <Image source={require("../assets/1730664856258.jpg")} style={styles.avatar} />
-          <Text style={[styles.name, { color: cores.texto }]}>Rodrigo Yamasaki</Text>
+          <Image
+            source={require("../assets/1730664856258.jpg")}
+            style={styles.avatar}
+          />
+          <Text style={[styles.name, { color: cores.texto }]}>
+            Rodrigo Yamasaki
+          </Text>
           <View style={styles.icons}>
-            <TouchableOpacity onPress={() => Linking.openURL("https://github.com/RodrygoYamasaki")}>
+            <TouchableOpacity
+              onPress={() =>
+                Linking.openURL("https://github.com/RodrygoYamasaki")
+              }
+            >
               <Ionicons name="logo-github" size={20} color={cores.texto} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => Linking.openURL("https://www.linkedin.com/in/rodrigo-yamasaki-74a3b1324/")}>
+            <TouchableOpacity
+              onPress={() =>
+                Linking.openURL(
+                  "https://www.linkedin.com/in/rodrigo-yamasaki-74a3b1324/",
+                )
+              }
+            >
               <Ionicons name="logo-linkedin" size={20} color="#0e76a8" />
             </TouchableOpacity>
           </View>
         </View>
       </View>
 
-      <Text style={[styles.footer, { color: cores.textoMuted }]}>FIAP • Mobile Application Development • 2025</Text>
+      <Text style={[styles.footer, { color: cores.textoMuted }]}>
+        FIAP • Mobile Application Development • 2026
+      </Text>
     </SafeAreaView>
   );
 }

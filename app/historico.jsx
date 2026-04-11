@@ -1,55 +1,109 @@
-import { Text, StyleSheet, View, FlatList, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
+import {
+  Text,
+  StyleSheet,
+  View,
+  FlatList,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { listarDenuncias, atualizarStatusDenuncia } from "../services/reportService";
+import {
+  listarDenuncias,
+  atualizarStatusDenuncia,
+  excluirDenuncia,
+} from "../services/reportService";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 
 export default function Historico() {
   const queryClient = useQueryClient();
-  const { token } = useAuth();
+  const { token, isAdmin } = useAuth();
+  const { cores } = useTheme();
 
-  const { data: denuncias = [], isLoading, refetch } = useQuery({
+  const {
+    data: denuncias = [],
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["denuncias"],
     queryFn: listarDenuncias,
     enabled: !!token,
   });
 
-  const mutationStatus = useMutation({
+  const mStatus = useMutation({
     mutationFn: ({ id, status }) => atualizarStatusDenuncia(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["denuncias"] });
       Alert.alert("Sucesso", "Status atualizado!");
     },
-    onError: () => {
-      Alert.alert("Erro", "Falha ao atualizar status");
-    },
+    onError: () => Alert.alert("Erro", "Falha ao atualizar status"),
   });
 
-  function handleAtualizarStatus(id, statusAtual) {
-    const novoStatus =
-      statusAtual === "NEW"
-        ? "UNDER_ANALYSIS"
-        : statusAtual === "UNDER_ANALYSIS"
-        ? "RESOLVED"
-        : "NEW";
+  const mExcluir = useMutation({
+    mutationFn: excluirDenuncia,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["denuncias"] });
+      Alert.alert("Sucesso", "Denúncia excluída!");
+    },
+    onError: () => Alert.alert("Erro", "Falha ao excluir denúncia"),
+  });
 
-    Alert.alert("Atualizar Status", `Mudar para: ${novoStatus}?`, [
+  function atualizarStatus(id, atual) {
+    const novo =
+      atual === "NEW"
+        ? "UNDER_ANALYSIS"
+        : atual === "UNDER_ANALYSIS"
+          ? "RESOLVED"
+          : "NEW";
+    Alert.alert("Atualizar Status", `Mudar para: ${novo}?`, [
       { text: "Cancelar" },
-      { text: "Confirmar", onPress: () => mutationStatus.mutate({ id, novoStatus }) },
+      {
+        text: "Confirmar",
+        onPress: () => mStatus.mutate({ id, status: novo }),
+      },
+    ]);
+  }
+
+  function confirmarExcluir(id, protocolo) {
+    Alert.alert("Excluir denúncia", `Remover o protocolo ${protocolo}?`, [
+      { text: "Cancelar" },
+      {
+        text: "Excluir",
+        style: "destructive",
+        onPress: () => mExcluir.mutate(id),
+      },
     ]);
   }
 
   if (!token) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.vazio}>
-          <Ionicons name="lock-closed-outline" size={60} color="#444" />
-          <Text style={styles.vazioText}>Faça login para ver os protocolos</Text>
-          <TouchableOpacity style={styles.botaoNovo} onPress={() => router.push("/login")}>
-            <Text style={styles.botaoNovoText}>Fazer login</Text>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: cores.fundo }]}
+      >
+        <View style={styles.center}>
+          <Ionicons
+            name="lock-closed-outline"
+            size={60}
+            color={cores.textoMuted}
+          />
+          <Text
+            style={{
+              color: cores.textoSecundario,
+              marginTop: 20,
+              marginBottom: 20,
+            }}
+          >
+            Faça login para ver os protocolos
+          </Text>
+          <TouchableOpacity
+            style={[styles.btn, { backgroundColor: cores.primario }]}
+            onPress={() => router.push("/login")}
+          >
+            <Text style={styles.btnText}>Fazer login</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -58,69 +112,126 @@ export default function Historico() {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-          <ActivityIndicator size="large" color="#d62828" />
-          <Text style={{ color: "#ccc", marginTop: 10 }}>Carregando...</Text>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: cores.fundo }]}
+      >
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={cores.primario} />
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: cores.fundo }]}>
       <View style={styles.header}>
-        <Text style={styles.title}>Histórico de Protocolos</Text>
-        <Text style={styles.subtitle}>{denuncias.length} denúncia(s)</Text>
+        <Text style={[styles.title, { color: cores.texto }]}>
+          Histórico de Protocolos
+        </Text>
+        <Text style={{ color: cores.textoMuted, fontSize: 13 }}>
+          {denuncias.length} denúncia(s)
+        </Text>
       </View>
 
       {denuncias.length === 0 ? (
-        <View style={styles.vazio}>
-          <Ionicons name="document-text-outline" size={60} color="#444" />
-          <Text style={styles.vazioText}>Nenhuma denúncia registrada</Text>
-          <TouchableOpacity style={styles.botaoNovo} onPress={() => router.push("/")}>
-            <Text style={styles.botaoNovoText}>Fazer nova denúncia</Text>
-          </TouchableOpacity>
+        <View style={styles.center}>
+          <Ionicons
+            name="document-text-outline"
+            size={60}
+            color={cores.textoMuted}
+          />
+          <Text style={{ color: cores.textoSecundario, marginTop: 20 }}>
+            Nenhuma denúncia registrada
+          </Text>
         </View>
       ) : (
         <FlatList
           data={denuncias}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(i) => i.id.toString()}
           refreshing={isLoading}
           onRefresh={refetch}
+          contentContainerStyle={{ padding: 20 }}
           renderItem={({ item }) => (
-            <View style={styles.card}>
-              <View style={styles.cardHeader}>
-                <View>
-                  <Text style={styles.protocolo}>#{item.protocol}</Text>
-                  <Text style={styles.categoria}>{item.game?.championship?.category}</Text>
+            <View
+              style={[
+                styles.card,
+                { backgroundColor: cores.fundoCard, borderColor: cores.borda },
+              ]}
+            >
+              <View
+                style={[styles.cardHeader, { borderBottomColor: cores.borda }]}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.protocolo, { color: cores.primario }]}>
+                    #{item.protocol}
+                  </Text>
+                  <Text
+                    style={{ color: cores.texto, fontSize: 13, marginTop: 4 }}
+                  >
+                    {item.game?.championship?.category}
+                  </Text>
                 </View>
-                <View style={styles.statusBadge}>
-                  <Text style={styles.statusText}>{item.status}</Text>
+                <View style={[styles.badge, { backgroundColor: cores.input }]}>
+                  <Text
+                    style={{
+                      color: cores.texto,
+                      fontSize: 11,
+                      fontWeight: "600",
+                    }}
+                  >
+                    {item.status}
+                  </Text>
                 </View>
               </View>
 
-              <Text style={styles.info}>Partida: {item.game?.place}</Text>
-              <Text style={styles.info}>Data: {item.date}</Text>
-              <Text style={styles.info}>Árbitro: {item.referee?.name}</Text>
+              <Text style={[styles.info, { color: cores.textoSecundario }]}>
+                Partida: {item.game?.place}
+              </Text>
+              <Text style={[styles.info, { color: cores.textoSecundario }]}>
+                Data: {item.date}
+              </Text>
+              <Text style={[styles.info, { color: cores.textoSecundario }]}>
+                Árbitro: {item.referee?.name}
+              </Text>
+
+              {isAdmin() && (
+                <TouchableOpacity
+                  style={[
+                    styles.btn,
+                    { backgroundColor: cores.primario, marginTop: 12 },
+                  ]}
+                  onPress={() => atualizarStatus(item.id, item.status)}
+                >
+                  <Text style={styles.btnText}>Atualizar status</Text>
+                </TouchableOpacity>
+              )}
 
               <TouchableOpacity
-                style={styles.botaoStatus}
-                onPress={() => handleAtualizarStatus(item.id, item.status)}
-                disabled={mutationStatus.isPending}
-              >
-                <Text style={styles.botaoStatusText}>Atualizar status</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.botaoVer}
+                style={{
+                  marginTop: 8,
+                  paddingTop: 8,
+                  borderTopWidth: 1,
+                  borderTopColor: cores.borda,
+                }}
                 onPress={() => Alert.alert("Relato Completo", item.content)}
               >
-                <Text style={styles.botaoVerText}>Ver relato completo</Text>
+                <Text style={{ color: cores.primario, fontWeight: "600" }}>
+                  Ver relato completo
+                </Text>
               </TouchableOpacity>
+
+              {isAdmin() && (
+                <TouchableOpacity
+                  style={{ marginTop: 8 }}
+                  onPress={() => confirmarExcluir(item.id, item.protocol)}
+                >
+                  <Text style={{ color: "#ff4444", fontWeight: "600" }}>
+                    Excluir denúncia
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
           )}
-          contentContainerStyle={styles.lista}
         />
       )}
     </SafeAreaView>
@@ -130,7 +241,12 @@ export default function Historico() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#111",
+  },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 40,
   },
   header: {
     padding: 20,
@@ -139,98 +255,42 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#fff",
-  },
-  subtitle: {
-    fontSize: 14,
-    color: "#888",
-    marginTop: 5,
-  },
-  lista: {
-    padding: 20,
   },
   card: {
-    backgroundColor: "#1a1a1a",
     borderRadius: 10,
     padding: 15,
     marginBottom: 15,
+    borderWidth: 1,
   },
   cardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 15,
+    alignItems: "center",
+    marginBottom: 12,
     paddingBottom: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "#333",
   },
   protocolo: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: "bold",
-    color: "#d62828",
   },
-  categoria: {
-    fontSize: 14,
-    color: "#fff",
-    marginTop: 5,
-  },
-  statusBadge: {
-    backgroundColor: "#333",
+  badge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 20,
-    justifyContent: "center",
-  },
-  statusText: {
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "600",
   },
   info: {
-    color: "#ccc",
-    fontSize: 14,
-    marginBottom: 5,
+    fontSize: 13,
+    marginBottom: 4,
   },
-  botaoStatus: {
-    marginTop: 10,
-    backgroundColor: "#d62828",
-    padding: 10,
+  btn: {
+    padding: 12,
     borderRadius: 8,
     alignItems: "center",
   },
-  botaoStatusText: {
-    color: "#fff",
-    fontWeight: "600",
-  },
-  botaoVer: {
-    marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: "#333",
-  },
-  botaoVerText: {
-    color: "#d62828",
-    fontWeight: "600",
-  },
-  vazio: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 40,
-  },
-  vazioText: {
-    color: "#ccc",
-    fontSize: 16,
-    marginTop: 20,
-    marginBottom: 30,
-  },
-  botaoNovo: {
-    backgroundColor: "#d62828",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  botaoNovoText: {
+  btnText: {
     color: "#fff",
     fontWeight: "bold",
+    fontSize: 15,
   },
 });

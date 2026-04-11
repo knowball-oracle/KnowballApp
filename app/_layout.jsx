@@ -5,7 +5,7 @@ import { ThemeProvider, useTheme } from "../context/ThemeContext";
 import QueryProvider from "../providers/QueryProvider";
 
 function TabsComTema() {
-  const { cores, tema, alternarTema } = useTheme();
+  const { cores } = useTheme();
 
   return (
     <Tabs
@@ -70,12 +70,12 @@ function TabsComTema() {
       />
 
       <Tabs.Screen
-        name="sobre"
+        name="campeonatos"
         options={{
-          title: "Sobre",
+          title: "Campeonatos",
           tabBarIcon: ({ focused, size }) => (
             <Ionicons
-              name={focused ? "information-circle" : "information-circle-outline"}
+              name={focused ? "trophy" : "trophy-outline"}
               color={focused ? "#d62828" : cores.textoMuted}
               size={size}
             />
@@ -83,7 +83,7 @@ function TabsComTema() {
         }}
       />
 
-       <Tabs.Screen
+      <Tabs.Screen
         name="apex"
         options={{
           title: "APEX",
@@ -97,11 +97,14 @@ function TabsComTema() {
         }}
       />
 
+      {/* Telas escondidas da tab bar */}
+      <Tabs.Screen name="sobre" options={{ href: null }} />
       <Tabs.Screen name="denuncia" options={{ href: null }} />
       <Tabs.Screen name="user" options={{ href: null }} />
       <Tabs.Screen name="historico" options={{ href: null }} />
       <Tabs.Screen name="login" options={{ href: null }} />
       <Tabs.Screen name="register" options={{ href: null }} />
+      <Tabs.Screen name="auditoria" options={{ href: null }} />
     </Tabs>
   );
 }

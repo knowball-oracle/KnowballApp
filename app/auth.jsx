@@ -1,4 +1,11 @@
-import { Text, StyleSheet, View, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
+import {
+  Text,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -26,11 +33,17 @@ export default function Auth() {
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.botao} onPress={() => router.push("/login")}>
+        <TouchableOpacity
+          style={styles.botao}
+          onPress={() => router.push("/login")}
+        >
           <Text style={styles.botaoText}>Fazer login</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.botaoSecundario} onPress={() => router.push("/register")}>
+        <TouchableOpacity
+          style={styles.botaoSecundario}
+          onPress={() => router.push("/register")}
+        >
           <Text style={styles.botaoSecundarioText}>Criar conta</Text>
         </TouchableOpacity>
       </SafeAreaView>
@@ -40,7 +53,9 @@ export default function Auth() {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
           <ActivityIndicator size="large" color="#d62828" />
           <Text style={{ color: "#ccc", marginTop: 10 }}>Carregando...</Text>
         </View>
@@ -66,22 +81,31 @@ export default function Auth() {
         <Text style={styles.statsLabel}>Denúncias registradas</Text>
       </View>
 
-      <TouchableOpacity style={styles.botao} onPress={() => router.push("/historico")}>
+      <TouchableOpacity
+        style={styles.botao}
+        onPress={() => router.push("/historico")}
+      >
         <Ionicons name="document-text-outline" size={20} color="#fff" />
         <Text style={styles.botaoText}>Ver protocolos</Text>
       </TouchableOpacity>
 
       {isAdmin() && (
-        <TouchableOpacity style={styles.botao} onPress={() => router.push("/arbitros")}>
+        <TouchableOpacity
+          style={styles.botao}
+          onPress={() => router.push("/arbitros")}
+        >
           <Ionicons name="people-outline" size={20} color="#fff" />
           <Text style={styles.botaoText}>Gerenciar árbitros</Text>
         </TouchableOpacity>
       )}
 
-      <TouchableOpacity style={styles.botaoLogout} onPress={async () => {
-        await fazerLogout();
-        Alert.alert("Logout", "Sessão encerrada com sucesso!");
-      }}>
+      <TouchableOpacity
+        style={styles.botaoLogout}
+        onPress={async () => {
+          await fazerLogout();
+          Alert.alert("Logout", "Sessão encerrada com sucesso!");
+        }}
+      >
         <Ionicons name="log-out-outline" size={20} color="#ff4444" />
         <Text style={styles.botaoLogoutText}>Sair</Text>
       </TouchableOpacity>

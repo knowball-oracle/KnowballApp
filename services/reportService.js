@@ -19,3 +19,7 @@ export async function atualizarStatusDenuncia(id, status) {
   const response = await api.put(`/reports/${id}/status`, { status });
   return response.data;
 }
+
+export async function excluirDenuncia(id) {
+  await api.delete(`/reports/${id}`);
+}

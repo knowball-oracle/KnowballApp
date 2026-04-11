@@ -9,9 +9,28 @@ export default function Home() {
   const { cores } = useTheme();
   const { token, userName, isAdmin } = useAuth();
 
+  const LinkSobre = () => (
+    <TouchableOpacity
+      onPress={() => router.push("/sobre")}
+      style={styles.linkSobre}
+      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+    >
+      <Ionicons
+        name="information-circle-outline"
+        size={16}
+        color={cores.textoMuted}
+      />
+      <Text style={[styles.linkSobreText, { color: cores.textoMuted }]}>
+        Sobre o projeto
+      </Text>
+    </TouchableOpacity>
+  );
+
   if (token) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: cores.fundo }]}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: cores.fundo }]}
+      >
         <View style={styles.logoContainer}>
           <Image
             source={require("../assets/knowball-oracle.png")}
@@ -24,7 +43,8 @@ export default function Home() {
           Olá, {userName}!
         </Text>
         <Text style={[styles.subtitle, { color: cores.textoSecundario }]}>
-          Combate à manipulação no futebol brasileiro masculino nas categorias de base
+          Combate à manipulação no futebol brasileiro masculino nas categorias
+          de base
         </Text>
 
         <TouchableOpacity
@@ -39,7 +59,11 @@ export default function Home() {
           style={[styles.botaoSecundario, { borderColor: cores.borda }]}
           onPress={() => router.push("/historico")}
         >
-          <Ionicons name="document-text-outline" size={22} color={cores.primario} />
+          <Ionicons
+            name="document-text-outline"
+            size={22}
+            color={cores.primario}
+          />
           <Text style={[styles.botaoSecundarioText, { color: cores.primario }]}>
             Meus protocolos
           </Text>
@@ -47,15 +71,26 @@ export default function Home() {
 
         {isAdmin() && (
           <TouchableOpacity
-            style={[styles.botaoAdmin, { backgroundColor: "#1a1a1a", borderColor: cores.borda }]}
+            style={[
+              styles.botaoAdmin,
+              { backgroundColor: cores.fundoCard, borderColor: cores.borda },
+            ]}
             onPress={() => router.push("/arbitros")}
           >
-            <Ionicons name="people-outline" size={22} color={cores.textoMuted} />
-            <Text style={[styles.botaoAdminText, { color: cores.textoMuted }]}>
+            <Ionicons
+              name="people-outline"
+              size={22}
+              color={cores.textoSecundario}
+            />
+            <Text
+              style={[styles.botaoAdminText, { color: cores.textoSecundario }]}
+            >
               Gerenciar árbitros
             </Text>
           </TouchableOpacity>
         )}
+
+        <LinkSobre />
       </SafeAreaView>
     );
   }
@@ -71,7 +106,8 @@ export default function Home() {
       </View>
 
       <Text style={[styles.subtitle, { color: cores.textoSecundario }]}>
-        Combate à manipulação no futebol brasileiro masculino nas categorias de base
+        Combate à manipulação no futebol brasileiro masculino nas categorias de
+        base
       </Text>
 
       <View style={styles.botoesContainer}>
@@ -87,7 +123,11 @@ export default function Home() {
           style={[styles.botaoSecundario, { borderColor: cores.borda }]}
           onPress={() => router.push("/login")}
         >
-          <Ionicons name="shield-checkmark-outline" size={22} color={cores.primario} />
+          <Ionicons
+            name="shield-checkmark-outline"
+            size={22}
+            color={cores.primario}
+          />
           <Text style={[styles.botaoSecundarioText, { color: cores.primario }]}>
             Área administrativa
           </Text>
@@ -97,6 +137,8 @@ export default function Home() {
       <Text style={[styles.rodape, { color: cores.textoMuted }]}>
         Sua identidade é protegida pelo protocolo de denúncia
       </Text>
+
+      <LinkSobre />
     </SafeAreaView>
   );
 }
@@ -177,5 +219,18 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: "center",
     marginTop: 20,
+  },
+  linkSobre: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    marginTop: 20,
+    padding: 8,
+  },
+  linkSobreText: {
+    fontSize: 13,
+    fontWeight: "500",
+    textDecorationLine: "underline",
   },
 });

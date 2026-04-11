@@ -1,26 +1,22 @@
-import { Text, TextInput, StyleSheet, View, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
+import {Text,TextInput,StyleSheet,View,TouchableOpacity,Alert,ActivityIndicator,} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { login } from "../services/authService";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
   const { setToken, setUserName, setUserRole } = useAuth();
+  const { cores } = useTheme();
 
   async function handleLogin() {
-    if (!email.trim()) {
-      Alert.alert("Atenção", "Digite seu e-mail");
-      return;
-    }
-    if (!senha.trim()) {
-      Alert.alert("Atenção", "Digite sua senha");
-      return;
-    }
+    if (!email.trim()) return Alert.alert("Atenção", "Digite seu e-mail");
+    if (!senha.trim()) return Alert.alert("Atenção", "Digite sua senha");
 
     setLoading(true);
     try {
@@ -37,18 +33,27 @@ export default function Login() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: cores.fundo }]}>
       <View style={styles.header}>
-        <Ionicons name="shield-checkmark" size={80} color="#d62828" />
-        <Text style={styles.title}>Knowball</Text>
-        <Text style={styles.subtitle}>Entre na sua conta</Text>
+        <Ionicons name="shield-checkmark" size={80} color={cores.primario} />
+        <Text style={[styles.title, { color: cores.texto }]}>Knowball</Text>
+        <Text style={[styles.subtitle, { color: cores.textoSecundario }]}>
+          Entre na sua conta
+        </Text>
       </View>
 
       <View style={styles.form}>
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            {
+              backgroundColor: cores.input,
+              color: cores.texto,
+              borderColor: cores.borda,
+            },
+          ]}
           placeholder="E-mail"
-          placeholderTextColor="#555"
+          placeholderTextColor={cores.textoMuted}
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
@@ -56,15 +61,26 @@ export default function Login() {
         />
 
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            {
+              backgroundColor: cores.input,
+              color: cores.texto,
+              borderColor: cores.borda,
+            },
+          ]}
           placeholder="Senha"
-          placeholderTextColor="#555"
+          placeholderTextColor={cores.textoMuted}
           value={senha}
           onChangeText={setSenha}
           secureTextEntry
         />
 
-        <TouchableOpacity style={styles.botao} onPress={handleLogin} disabled={loading}>
+        <TouchableOpacity
+          style={[styles.botao, { backgroundColor: cores.primario }]}
+          onPress={handleLogin}
+          disabled={loading}
+        >
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
@@ -72,8 +88,16 @@ export default function Login() {
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.linkCadastro} onPress={() => router.push("/register")}>
-          <Text style={styles.linkCadastroText}>Não tem conta? <Text style={styles.linkDestaque}>Cadastre-se</Text></Text>
+        <TouchableOpacity
+          style={styles.linkCadastro}
+          onPress={() => router.push("/register")}
+        >
+          <Text style={{ color: cores.textoMuted, fontSize: 14 }}>
+            Não tem conta?{" "}
+            <Text style={{ color: cores.primario, fontWeight: "bold" }}>
+              Cadastre-se
+            </Text>
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -83,7 +107,6 @@ export default function Login() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#111",
     padding: 24,
     justifyContent: "center",
   },
@@ -94,29 +117,23 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#fff",
     marginTop: 20,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 15,
-    color: "#ccc",
   },
   form: {
     width: "100%",
   },
   input: {
-    backgroundColor: "#1a1a1a",
-    color: "#fff",
     padding: 15,
     borderRadius: 10,
     marginBottom: 15,
     borderWidth: 1,
-    borderColor: "#333",
     fontSize: 16,
   },
   botao: {
-    backgroundColor: "#d62828",
     padding: 18,
     borderRadius: 10,
     alignItems: "center",
@@ -129,13 +146,5 @@ const styles = StyleSheet.create({
   },
   linkCadastro: {
     alignItems: "center",
-  },
-  linkCadastroText: {
-    color: "#888",
-    fontSize: 14,
-  },
-  linkDestaque: {
-    color: "#d62828",
-    fontWeight: "bold",
   },
 });
