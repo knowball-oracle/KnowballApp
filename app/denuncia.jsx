@@ -4,7 +4,7 @@ import { useState } from "react";
 import { router } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { criarDenuncia } from "../services/reportService";
-import { listarPartidas } from "../services/gameService";
+import { listarPartidas, listarParticipacoesPorPartida } from "../services/gameService";
 import { listarArbitrosPorPartida } from "../services/refereeService";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
@@ -31,6 +31,12 @@ export default function Denuncia() {
     enabled: !!gameId,
   });
 
+  const { data: participacoes = [] } = useQuery({
+    queryKey: ["participacoes", gameId],
+    queryFn: () => listarParticipacoesPorPartida(gameId),
+    enabled: !!gameId,
+  });
+
   const mutation = useMutation({
     mutationFn: criarDenuncia,
     onSuccess: (data) => {
@@ -49,6 +55,21 @@ export default function Denuncia() {
   function handleSelecionarPartida(id) {
     setGameId(id);
     setRefereeId(null);
+  }
+
+  function getNomePartida(partida) {
+    return `${partida.place} — ${partida.championship?.category}`;
+  }
+
+  function getNomePartidaSelecionada() {
+    if (!gameId) return "";
+    const timeCasa = participacoes.find(p => p.type === "HOME")?.team?.name || "";
+    const timeFora = participacoes.find(p => p.type === "AWAY")?.team?.name || "";
+    const partida = partidas.find(p => p.id === gameId);
+    if (timeCasa && timeFora) {
+      return `${timeCasa} x ${timeFora} — ${partida?.place}`;
+    }
+    return partida ? getNomePartida(partida) : "";
   }
 
   function handleSalvar() {
@@ -127,11 +148,22 @@ export default function Denuncia() {
                 onPress={() => handleSelecionarPartida(p.id)}
               >
                 <Text style={[styles.chipTexto, { color: cores.texto }]}>
-                  {p.place} — {p.championship?.category}
+                  {getNomePartida(p)}
                 </Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
+        )}
+
+        {gameId && (
+          <View style={[styles.partidaSelecionada, { backgroundColor: cores.fundoCard, borderColor: cores.borda }]}>
+            <Text style={[styles.partidaSelecionadaTexto, { color: cores.textoMuted }]}>
+              Partida selecionada:
+            </Text>
+            <Text style={[styles.partidaSelecionadaNome, { color: cores.texto }]}>
+              {getNomePartidaSelecionada()}
+            </Text>
+          </View>
         )}
 
         {gameId && (
@@ -223,6 +255,20 @@ const styles = StyleSheet.create({
   chipTexto: {
     fontWeight: "bold",
     fontSize: 13,
+  },
+  partidaSelecionada: {
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginBottom: 15,
+  },
+  partidaSelecionadaTexto: {
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  partidaSelecionadaNome: {
+    fontSize: 15,
+    fontWeight: "bold",
   },
   input: {
     padding: 15,
