@@ -83,12 +83,25 @@ function TabsComTema() {
         }}
       />
 
+       <Tabs.Screen
+        name="apex"
+        options={{
+          title: "APEX",
+          tabBarIcon: ({ focused, size }) => (
+            <Ionicons
+              name={focused ? "analytics" : "analytics-outline"}
+              color={focused ? "#d62828" : cores.textoMuted}
+              size={size}
+            />
+          ),
+        }}
+      />
+
       <Tabs.Screen name="denuncia" options={{ href: null }} />
       <Tabs.Screen name="user" options={{ href: null }} />
       <Tabs.Screen name="historico" options={{ href: null }} />
       <Tabs.Screen name="login" options={{ href: null }} />
       <Tabs.Screen name="register" options={{ href: null }} />
-      <Tabs.Screen name="apex" options={{ href: null }} />
     </Tabs>
   );
 }
