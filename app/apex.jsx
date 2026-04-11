@@ -1,76 +1,40 @@
-import { Text, StyleSheet, View, TouchableOpacity, ActivityIndicator, ScrollView } from "react-native";
+import { Text, StyleSheet, View, ScrollView, ActivityIndicator, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { buscarEstatisticas, sincronizarDenuncias } from "../services/apexService";
-import { useAuth } from "../context/AuthContext";
+import { router } from "expo-router";
+import { useQuery } from "@tanstack/react-query";
+import { buscarRanking } from "../services/apexService";
 import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function Apex() {
-  const { token } = useAuth();
   const { cores } = useTheme();
-  const queryClient = useQueryClient();
+  const { isAdmin } = useAuth();
 
-  const { data: stats = [], isLoading, isError, refetch } = useQuery({
-    queryKey: ["apexStats"],
-    queryFn: buscarEstatisticas,
+  const { data: ranking = [], isLoading, isError, refetch } = useQuery({
+    queryKey: ["rankingApex"], queryFn: buscarRanking,
   });
 
-  const mutation = useMutation({
-    mutationFn: sincronizarDenuncias,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["apexStats"] });
-    },
-    onError: (error) => {
-      console.log("Erro sync:", error.message);
-    },
-  });
-
-  function getCorStatus(status) {
-    switch (status) {
-      case "NEW": return "#d62828";
-      case "UNDER_ANALYSIS": return "#f4a261";
-      case "RESOLVED": return "#2a9d8f";
-      default: return "#888";
-    }
-  }
-
-  function getLabelStatus(status) {
-    switch (status) {
-      case "NEW": return "Novas";
-      case "UNDER_ANALYSIS": return "Em Análise";
-      case "RESOLVED": return "Resolvidas";
-      default: return status;
-    }
+  function getCorScore(total) {
+    if (total >= 3) return "#d62828";
+    if (total >= 2) return "#f4a261";
+    return "#2a9d8f";
   }
 
   if (isLoading) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: cores.fundo }]}>
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-          <ActivityIndicator size="large" color={cores.primario} />
-          <Text style={{ color: cores.textoSecundario, marginTop: 10 }}>
-            Conectando ao Oracle APEX...
-          </Text>
-        </View>
+        <View style={styles.center}><ActivityIndicator size="large" color={cores.primario} /><Text style={{ color: cores.textoMuted, marginTop: 10 }}>Conectando ao Oracle APEX...</Text></View>
       </SafeAreaView>
     );
   }
-
   if (isError) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: cores.fundo }]}>
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 40 }}>
+        <View style={styles.center}>
           <Ionicons name="cloud-offline-outline" size={60} color="#444" />
-          <Text style={[styles.erroText, { color: cores.textoSecundario }]}>
-            Não foi possível conectar ao Oracle APEX
-          </Text>
-          <TouchableOpacity
-            style={[styles.botao, { backgroundColor: cores.primario }]}
-            onPress={refetch}
-          >
-            <Text style={styles.botaoText}>Tentar novamente</Text>
-          </TouchableOpacity>
+          <Text style={{ color: cores.textoSecundario, marginTop: 20, textAlign: "center" }}>APEX indisponível</Text>
+          <TouchableOpacity style={[styles.botao, { backgroundColor: cores.primario, marginTop: 20 }]} onPress={refetch}><Text style={styles.botaoText}>Tentar novamente</Text></TouchableOpacity>
         </View>
       </SafeAreaView>
     );
@@ -78,167 +42,61 @@ export default function Apex() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: cores.fundo }]}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView>
         <View style={styles.header}>
-          <Ionicons name="analytics-outline" size={40} color={cores.primario} />
-          <Text style={[styles.title, { color: cores.texto }]}>Painel Oracle APEX</Text>
-          <Text style={[styles.subtitle, { color: cores.textoMuted }]}>
-            Estatísticas de denúncias em tempo real
-          </Text>
-        </View>
-
-        <View style={styles.statsContainer}>
-          {stats.map((item) => (
-            <View
-              key={item.status}
-              style={[styles.statCard, { backgroundColor: cores.fundoCard, borderColor: cores.borda }]}
-            >
-              <View style={[styles.statIndicador, { backgroundColor: getCorStatus(item.status) }]} />
-              <View style={styles.statInfo}>
-                <Text style={[styles.statLabel, { color: cores.textoMuted }]}>
-                  {getLabelStatus(item.status)}
-                </Text>
-                <Text style={[styles.statTotal, { color: cores.texto }]}>
-                  {item.total}
-                </Text>
-                <Text style={[styles.statData, { color: cores.textoMuted }]}>
-                  Atualizado: {new Date(item.data_atualizacao).toLocaleString("pt-BR")}
-                </Text>
-              </View>
-            </View>
-          ))}
+          <Ionicons name="shield-checkmark" size={40} color={cores.primario} />
+          <Text style={[styles.title, { color: cores.texto }]}>Central de Integridade</Text>
+          <Text style={[styles.subtitle, { color: cores.textoMuted }]}>Oracle APEX • Análise Anti-Manipulação</Text>
         </View>
 
         <View style={[styles.infoCard, { backgroundColor: cores.fundoCard, borderColor: cores.borda }]}>
-          <Ionicons name="information-circle-outline" size={20} color={cores.primario} />
-          <Text style={[styles.infoText, { color: cores.textoSecundario }]}>
-            Este painel é alimentado pelo Oracle APEX via REST API. Sincronize para atualizar as estatísticas com os dados reais do sistema.
+          <Ionicons name="information-circle" size={20} color={cores.primario} />
+          <Text style={{ color: cores.textoSecundario, flex: 1, fontSize: 13, lineHeight: 19 }}>
+            Toda denúncia passa pelo Oracle APEX, que calcula um score de risco (0-100) via procedure PL/SQL. Árbitros com score ≥70 são bloqueados automaticamente.
           </Text>
         </View>
 
-        {token && (
-          <TouchableOpacity
-            style={[styles.botao, { backgroundColor: cores.primario }]}
-            onPress={() => mutation.mutate()}
-            disabled={mutation.isPending}
-          >
-            {mutation.isPending ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <>
-                <Ionicons name="sync-outline" size={20} color="#fff" />
-                <Text style={styles.botaoText}>Sincronizar denúncias com APEX</Text>
-              </>
-            )}
+        <Text style={[styles.sectionTitle, { color: cores.texto }]}>Ranking de Risco</Text>
+        {ranking.length === 0 ? (
+          <Text style={{ color: cores.textoMuted, textAlign: "center", marginTop: 20 }}>Nenhuma denúncia registrada</Text>
+        ) : ranking.map((item, i) => {
+          const cor = getCorScore(item.total_denuncias);
+          return (
+            <View key={item.id_arbitro} style={[styles.rankCard, { backgroundColor: cores.fundoCard, borderColor: cores.borda }]}>
+              <View style={[styles.rankPos, { backgroundColor: cor }]}><Text style={styles.rankPosText}>{i + 1}</Text></View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.rankNome, { color: cores.texto }]}>{item.nome_arbitro}</Text>
+                <Text style={{ color: cores.textoMuted, fontSize: 12 }}>
+                  {item.total_denuncias} total • {item.novas} novas • {item.em_analise} em análise
+                </Text>
+              </View>
+            </View>
+          );
+        })}
+
+        {isAdmin() && (
+          <TouchableOpacity style={[styles.botao, { backgroundColor: cores.primario, marginTop: 20 }]} onPress={() => router.push("/auditoria")}>
+            <Ionicons name="document-text-outline" size={18} color="#fff" />
+            <Text style={styles.botaoText}>Ver auditoria de verificações</Text>
           </TouchableOpacity>
         )}
-
-        <TouchableOpacity
-          style={[styles.botaoRefresh, { borderColor: cores.borda }]}
-          onPress={refetch}
-        >
-          <Ionicons name="refresh-outline" size={20} color={cores.primario} />
-          <Text style={[styles.botaoRefreshText, { color: cores.primario }]}>Atualizar dados</Text>
-        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 24,
-  },
-  header: {
-    alignItems: "center",
-    marginBottom: 30,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginTop: 10,
-    marginBottom: 5,
-  },
-  subtitle: {
-    fontSize: 14,
-    textAlign: "center",
-  },
-  statsContainer: {
-    gap: 15,
-    marginBottom: 20,
-  },
-  statCard: {
-    flexDirection: "row",
-    borderRadius: 12,
-    borderWidth: 1,
-    overflow: "hidden",
-  },
-  statIndicador: {
-    width: 6,
-  },
-  statInfo: {
-    flex: 1,
-    padding: 15,
-  },
-  statLabel: {
-    fontSize: 13,
-    marginBottom: 4,
-  },
-  statTotal: {
-    fontSize: 32,
-    fontWeight: "bold",
-    marginBottom: 4,
-  },
-  statData: {
-    fontSize: 11,
-  },
-  infoCard: {
-    flexDirection: "row",
-    gap: 10,
-    padding: 15,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginBottom: 20,
-    alignItems: "flex-start",
-  },
-  infoText: {
-    flex: 1,
-    fontSize: 13,
-    lineHeight: 20,
-  },
-  botao: {
-    flexDirection: "row",
-    padding: 16,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    marginBottom: 12,
-  },
-  botaoText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  botaoRefresh: {
-    flexDirection: "row",
-    padding: 14,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    borderWidth: 1,
-    marginBottom: 20,
-  },
-  botaoRefreshText: {
-    fontWeight: "600",
-    fontSize: 15,
-  },
-  erroText: {
-    fontSize: 16,
-    textAlign: "center",
-    marginTop: 20,
-    marginBottom: 30,
-  },
+  container: { flex: 1, padding: 20 },
+  center: { flex: 1, justifyContent: "center", alignItems: "center", padding: 40 },
+  header: { alignItems: "center", marginBottom: 20 },
+  title: { fontSize: 22, fontWeight: "bold", marginTop: 10 },
+  subtitle: { fontSize: 13, marginTop: 4 },
+  infoCard: { flexDirection: "row", gap: 10, padding: 15, borderRadius: 10, borderWidth: 1, marginBottom: 20 },
+  sectionTitle: { fontSize: 17, fontWeight: "bold", marginBottom: 12 },
+  rankCard: { flexDirection: "row", alignItems: "center", padding: 14, borderRadius: 10, borderWidth: 1, marginBottom: 10, gap: 12 },
+  rankPos: { width: 32, height: 32, borderRadius: 16, justifyContent: "center", alignItems: "center" },
+  rankPosText: { color: "#fff", fontWeight: "bold" },
+  rankNome: { fontSize: 15, fontWeight: "bold", marginBottom: 2 },
+  botao: { flexDirection: "row", padding: 14, borderRadius: 8, alignItems: "center", justifyContent: "center", gap: 8 },
+  botaoText: { color: "#fff", fontWeight: "bold", fontSize: 15 },
 });
