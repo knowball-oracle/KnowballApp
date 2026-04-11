@@ -1,13 +1,13 @@
-import { Text, StyleSheet, View, TouchableOpacity, Alert, ActivityIndicator, ScrollView } from "react-native";
+import { Text, StyleSheet, View, TouchableOpacity, ActivityIndicator, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { buscarEstatisticas, registrarDenunciaApex } from "../services/apexService";
+import { buscarEstatisticas, sincronizarDenuncias } from "../services/apexService";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 
 export default function Apex() {
-  const { token, userName } = useAuth();
+  const { token } = useAuth();
   const { cores } = useTheme();
   const queryClient = useQueryClient();
 
@@ -17,17 +17,12 @@ export default function Apex() {
   });
 
   const mutation = useMutation({
-    mutationFn: () => registrarDenunciaApex(
-      Math.floor(100000 + Math.random() * 900000).toString(),
-      "NEW",
-      "Denúncia registrada via app Knowball"
-    ),
+    mutationFn: sincronizarDenuncias,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["apexStats"] });
-      Alert.alert("Sucesso", "Denúncia registrada no sistema APEX!");
     },
-    onError: () => {
-      Alert.alert("Erro", "Falha ao registrar no APEX");
+    onError: (error) => {
+      console.log("Erro sync:", error.message);
     },
   });
 
@@ -117,7 +112,7 @@ export default function Apex() {
         <View style={[styles.infoCard, { backgroundColor: cores.fundoCard, borderColor: cores.borda }]}>
           <Ionicons name="information-circle-outline" size={20} color={cores.primario} />
           <Text style={[styles.infoText, { color: cores.textoSecundario }]}>
-            Este painel é alimentado pelo Oracle APEX via REST API. As estatísticas são atualizadas automaticamente a cada nova denúncia registrada no sistema.
+            Este painel é alimentado pelo Oracle APEX via REST API. Sincronize para atualizar as estatísticas com os dados reais do sistema.
           </Text>
         </View>
 
@@ -131,8 +126,8 @@ export default function Apex() {
               <ActivityIndicator color="#fff" />
             ) : (
               <>
-                <Ionicons name="add-circle-outline" size={20} color="#fff" />
-                <Text style={styles.botaoText}>Registrar denúncia no APEX</Text>
+                <Ionicons name="sync-outline" size={20} color="#fff" />
+                <Text style={styles.botaoText}>Sincronizar denúncias com APEX</Text>
               </>
             )}
           </TouchableOpacity>

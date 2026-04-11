@@ -1,4 +1,5 @@
 import axios from "axios";
+import api from "./api";
 
 const APEX_BASE = "https://gff701c74196926-knowballapex.adb.sa-saopaulo-1.oraclecloudapps.com/ords/knowball/knowball";
 
@@ -26,11 +27,28 @@ export async function buscarEstatisticas() {
   }
 }
 
-export async function registrarDenunciaApex(protocolo, status, conteudo) {
-  const response = await apexApi.post("/stats", {
-    protocolo,
-    status,
-    conteudo,
-  });
+export async function sincronizarDenuncias() {
+  // Busca denúncias reais da API do Gabriel
+  const response = await api.get("/reports");
+  const denuncias = response.data._embedded?.reportList || [];
+
+  // Conta por status
+  const contagem = {
+    NEW: denuncias.filter(d => d.status === "NEW").length,
+    UNDER_ANALYSIS: denuncias.filter(d => d.status === "UNDER_ANALYSIS").length,
+    RESOLVED: denuncias.filter(d => d.status === "RESOLVED").length,
+  };
+
+  // Atualiza cada status no APEX
+  for (const [status, total] of Object.entries(contagem)) {
+    await apexApi.post("/sync", { status, total });
+  }
+
+  return contagem;
+  
+}
+
+export async function verificarElegibilidade(arbitroId) {
+  const response = await apexApi.get(`/verificar/${arbitroId}`);
   return response.data;
 }

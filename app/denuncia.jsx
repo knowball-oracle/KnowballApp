@@ -8,6 +8,8 @@ import { listarPartidas, listarParticipacoesPorPartida } from "../services/gameS
 import { listarArbitrosPorPartida } from "../services/refereeService";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
+import { registrarDenunciaApex } from "../services/apexService";
+import { verificarElegibilidade } from "../services/apexService";
 
 export default function Denuncia() {
   const { token, userName } = useAuth();
@@ -37,20 +39,32 @@ export default function Denuncia() {
     enabled: !!gameId,
   });
 
-  const mutation = useMutation({
-    mutationFn: criarDenuncia,
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["denuncias"] });
-      queryClient.invalidateQueries({ queryKey: ["arbitros"] });
-      router.push({
-        pathname: "/user",
-        params: { nome: userName, protocolo: data.protocol || protocolo },
-      });
-    },
-    onError: () => {
-      Alert.alert("Erro", "Falha ao enviar a denúncia.");
-    },
-  });
+const mutation = useMutation({
+  mutationFn: criarDenuncia,
+  onSuccess: async (data) => {
+    queryClient.invalidateQueries({ queryKey: ["denuncias"] });
+    queryClient.invalidateQueries({ queryKey: ["arbitros"] });
+    
+    // Registra automaticamente no APEX
+    try {
+      await registrarDenunciaApex(
+        data.protocol || protocolo,
+        data.status || "NEW",
+        relato.trim()
+      );
+    } catch (error) {
+      console.log("Erro ao registrar no APEX:", error.message);
+    }
+
+    router.push({
+      pathname: "/user",
+      params: { nome: userName, protocolo: data.protocol || protocolo },
+    });
+  },
+  onError: () => {
+    Alert.alert("Erro", "Falha ao enviar a denúncia.");
+  },
+});
 
   function handleSelecionarPartida(id) {
     setGameId(id);
@@ -72,7 +86,7 @@ export default function Denuncia() {
     return partida ? getNomePartida(partida) : "";
   }
 
-  function handleSalvar() {
+  async function handleSalvar() {
     if (!gameId) {
       Alert.alert("Atenção", "Selecione uma partida");
       return;
@@ -83,6 +97,21 @@ export default function Denuncia() {
     }
     if (!relato.trim() || relato.trim().length < 20) {
       Alert.alert("Atenção", "Relato deve ter pelo menos 20 caracteres");
+      return;
+    }
+
+    // Verifica elegibilidade do árbitro no Oracle APEX
+    try {
+      const elegibilidade = await verificarElegibilidade(refereeId);
+      if (elegibilidade.status === "BLOQUEADO") {
+        Alert.alert(
+          "Árbitro Bloqueado",
+          `Este árbitro já possui ${elegibilidade.total_denuncias} denúncias registradas e está bloqueado para novas denúncias.`
+        );
+        return;
+      }
+    } catch (error) {
+      Alert.alert("Erro", "Não foi possível verificar elegibilidade. O sistema APEX está indisponível.");
       return;
     }
 
