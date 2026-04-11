@@ -1,274 +1,267 @@
-# ⚽ Knowball – Sistema de Denúncias Anônimas
+# ⚽ Knowball — Sistema Anti-Manipulação no Futebol de Base
 
-## 📘 Descrição do Projeto
-
-O **Knowball** é um aplicativo mobile desenvolvido em **React Native com Expo** que visa **combater manipulações e fraudes no futebol brasileiro masculino nas categorias de base**.
-
-A solução oferece um canal seguro e simples para **denúncias anônimas** com **integração completa de API REST**, permitindo registro, consulta e gerenciamento de denúncias, fortalecendo a integridade esportiva.
+Aplicativo mobile para denúncias de manipulação em partidas das categorias de base do futebol brasileiro masculino, integrando um backend Spring Boot e o **Oracle APEX como sistema anti-manipulação com regras de negócio em PL/SQL**.
 
 ---
 
-## 🎯 Objetivos
+## 📘 O Problema
 
-- Facilitar o registro de denúncias de forma segura e intuitiva
-- Integrar com API REST para operações CRUD completas
-- Gerenciar denúncias através de área administrativa protegida
-- Criar interface funcional e responsiva
-- Proporcionar navegação fluida entre telas com Expo Router
+Manipulações e fraudes em campeonatos de base (suborno de árbitros, conluio entre equipes, acerto de placares) comprometem a integridade dos torneios, reduzem a motivação dos jovens atletas e afetam a credibilidade dos clubes. Faltam canais estruturados para denúncia segura e mecanismos inteligentes de triagem.
 
----
+## 💡 A Solução
 
-## 📱 Funcionalidades Principais
+O **Knowball** oferece:
 
-### 🏠 Tela Inicial (`index.jsx`)
-- Coleta **nome** e **e-mail** do denunciante
-- **Validação em tempo real** de campos obrigatórios
-- Validação de formato de e-mail
-- Direciona para o formulário de denúncia
-- Exibe logotipo Knowball + Oracle
+1. **Canal de denúncia** com protocolo oficial rastreável, acessível via app mobile
+2. **Triagem automática anti-manipulação** no Oracle APEX, que calcula um **score de risco (0-100)** por árbitro via **procedure PL/SQL** e classifica em três níveis: `LIBERADO`, `ALERTA`, `BLOQUEADO`
+3. **Bloqueio automático** de novas denúncias contra árbitros já sob alto escrutínio (score ≥70), evitando abuso do sistema
+4. **Área administrativa** para a comissão disciplinar acompanhar casos, avançar status, julgar vereditos e consultar auditoria
 
-### 📝 Tela de Denúncia (`denuncia.jsx`)
-- Formulário completo com validações:
-  - Seleção de categoria (Sub-13, Sub-15, Sub-17, Sub-20)
-  - Informações da partida e árbitro
-  - Validação de data (formato DD/MM/AAAA)
-  - Relato com contador de caracteres (mínimo 20)
-- **Integração com API REST** via POST
-- Gera **protocolo único** automático
-- Loading visual durante envio
-- Feedback de sucesso/erro ao usuário
-
-### 👤 Tela de Confirmação (`user.jsx`)
-- Exibe mensagem de sucesso após envio
-- Mostra **número de protocolo gerado**
-- Informações sobre próximos passos
-- Opções de navegação (nova denúncia ou voltar)
-
-### 🔐 Tela de Autenticação (`auth.jsx`)
-- Área restrita protegida por código
-- **Integração com API** para verificar denúncias
-- Validação de acesso administrativo
-- Código de demonstração: **1234**
-
-### 📋 Histórico de Protocolos (`historico.jsx`)
-- **Integração com API REST** via GET
-- Lista todas as denúncias registradas
-- Exibição em cards com informações principais
-- **Pull-to-refresh** para atualizar lista
-- Ver detalhes completos de cada denúncia
-- **Operações DELETE:**
-  - Exclusão individual de denúncias
-  - Exclusão em lote (limpar tudo)
-- Confirmações de segurança antes de excluir
-- Tela vazia personalizada quando não há denúncias
-
-### ℹ️ Tela Sobre (`sobre.jsx`)
-- Informações sobre o projeto
-- Apresentação da equipe de desenvolvimento
-- Links diretos para **GitHub** e **LinkedIn** dos integrantes
+O Oracle APEX é **peça central** da solução: sem ele, o app **não consegue criar denúncias** — toda nova denúncia passa obrigatoriamente pela verificação do APEX.
 
 ---
 
-## 🔌 Integração com API
-
-### **API Utilizada:** MockAPI
-**Base URL:** `https://6909f3041a446bb9cc20b45c.mockapi.io`
-
-### **Endpoints Implementados:**
-
-| Método | Endpoint | Descrição | Usado em |
-|--------|----------|-----------|----------|
-| `GET` | `/denuncias` | Lista todas as denúncias | historico.jsx, auth.jsx |
-| `POST` | `/denuncias` | Cria nova denúncia | denuncia.jsx |
-| `DELETE` | `/denuncias/:id` | Exclui denúncia específica | historico.jsx |
-
-### **Estrutura de Dados:**
-```json
-{
-  "id": "1",
-  "nome": "João Silva",
-  "email": "joao@email.com",
-  "categoria": "Sub-17",
-  "partida": "Corinthians x Palmeiras",
-  "data": "15/11/2025",
-  "arbitro": "Carlos Roberto",
-  "relato": "Descrição detalhada da denúncia...",
-  "protocolo": "123456",
-  "dataEnvio": "2025-11-09T10:30:00.000Z"
-}
-```
-
----
-
-## 💾 Tecnologias Utilizadas
-
-- [React Native](https://reactnative.dev/) - Framework mobile
-- [Expo](https://expo.dev/) ~52.0.23 - Plataforma de desenvolvimento
-- [Expo Router](https://expo.github.io/router/docs) ~4.0.17 - Navegação
-- [Axios](https://axios-http.com/) ^1.7.9 - Cliente HTTP para API
-- [Expo Vector Icons](https://icons.expo.fyi/) - Ícones (Ionicons)
-- React Hooks (useState, useFocusEffect, useCallback)
-
----
-
-## 🏗️ Arquitetura do Código
+## 🏗️ Arquitetura
 
 ```
-📦 Knowball
-├── 📱 app/
-│   ├── constants.js          # Constantes e configurações da API
-│   ├── _layout.jsx           # Configuração de navegação (Tabs)
-│   ├── index.jsx             # Tela inicial (validações)
-│   ├── denuncia.jsx          # Formulário com integração API
-│   ├── user.jsx              # Confirmação de envio
-│   ├── auth.jsx              # Autenticação área restrita
-│   ├── historico.jsx         # Lista e gerenciamento (CRUD)
-│   └── sobre.jsx             # Informações do app
-├── 🖼️ assets/
-│   ├── knowball-oracle.png   # Logo principal
-│   ├── 1761361880310.jpg     # Foto Patrick
-│   ├── 1760106364040.png     # Foto Gabriel
-│   └── 1730664856258.jpg     # Foto Rodrigo
-└── 📄 package.json
+┌─────────────────────┐        ┌──────────────────────┐
+│  App React Native   │◄──────►│  Spring Boot API     │
+│  (Expo Router)      │        │  (JWT RSA + Oracle)  │
+│                     │        │  knowball-api        │
+└──────────┬──────────┘        └──────────────────────┘
+           │
+           │    ┌────────────────────────────────┐
+           └───►│  Oracle APEX (ORDS)            │
+                │  - Procedure PL/SQL (score)    │
+                │  - Sequence (protocolo)        │
+                │  - Auditoria (rastreabilidade) │
+                └────────────────────────────────┘
 ```
 
-### **Organização e Boas Práticas:**
-✅ Separação de responsabilidades (constants.js para API)  
-✅ Validações centralizadas e reutilizáveis  
-✅ Nomenclatura clara e padronizada  
-✅ Código limpo e bem estruturado  
-✅ Indentação consistente  
-✅ Tratamento de erros em todas requisições  
-✅ Loading states e feedback visual  
-✅ Componentes funcionais com hooks  
+- **Backend Spring Boot** (knowball-api): persistência principal de campeonatos, partidas, árbitros, escalações e denúncias. Autenticação JWT com chaves RSA assimétricas.
+- **Oracle APEX**: lógica anti-manipulação (procedure `CALCULAR_SCORE_ARBITRO`), geração de protocolos (sequence), auditoria de verificações.
+- **App React Native**: consome ambos. Toda denúncia passa primeiro pelo APEX antes de ser registrada.
 
 ---
 
-## 🚀 Como Executar o Projeto
+## 🔐 Oracle APEX — Sistema Anti-Manipulação
 
-### **Pré-requisitos:**
-- Node.js (v16 ou superior)
-- npm ou yarn
-- Expo Go (app no celular) ou Emulador Android/iOS
+### Regra de Negócio (PL/SQL)
 
-### **Instalação:**
+A procedure `CALCULAR_SCORE_ARBITRO` calcula o score de risco de um árbitro com pesos diferenciados:
 
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/castropatrick/knowball-mobile.git
-   cd knowball-mobile
-   ```
+| Critério | Peso |
+|---|---|
+| Denúncia `NEW` nos últimos 7 dias | **50** |
+| Denúncia `UNDER_REVIEW` (em análise) | **30** |
+| Denúncia antiga (>90 dias, qualquer status) | **10** |
 
-2. Instale as dependências:
-   ```bash
-   npm install
-   ```
+O score final é limitado a 100 e classificado:
 
-3. Inicie o aplicativo:
-   ```bash
-   npx expo start
-   ```
+- **0-39** → 🟢 `LIBERADO`
+- **40-69** → 🟡 `ALERTA`
+- **70-100** → 🔴 `BLOQUEADO` (novas denúncias bloqueadas automaticamente)
 
-4. **Opções de execução:**
-   - Pressione `a` para Android
-   - Pressione `i` para iOS
-   - Escaneie o QR Code com **Expo Go** no celular
+### Endpoints REST do APEX (ORDS)
+
+| Método | Endpoint | Função |
+|---|---|---|
+| `GET` | `/knowball/verificar/{arbitro_id}` | Roda a procedure, calcula score, registra auditoria |
+| `POST` | `/knowball/registrar` | Gera protocolo via sequence e persiste denúncia |
+| `GET` | `/knowball/minhas/{email}` | Retorna denúncias do usuário (filtro por email) |
+| `GET` | `/knowball/ranking` | Top 5 árbitros mais denunciados (agregado) |
+| `GET` | `/knowball/auditoria` | Últimas 50 verificações registradas |
+
+### Dependência do APEX
+
+A tela `denuncia.jsx` chama `verificarElegibilidade()` **antes** de registrar qualquer denúncia. Se o APEX estiver indisponível, a denúncia é abortada com mensagem explícita ao usuário. **Sem APEX, o app não funciona.**
+
+---
+
+## 📱 Telas do App
+
+| Tela | Descrição | Acesso |
+|---|---|---|
+| **Início** | Home com navegação principal | Público |
+| **Login / Cadastro** | Autenticação JWT | Público |
+| **Nova Denúncia** | Formulário com verificação APEX em tempo real | USER + ADMIN |
+| **Meus Protocolos** | Denúncias do usuário logado (filtro via APEX) | USER |
+| **Todas as Denúncias** | Listagem completa com filtro por status | ADMIN |
+| **Árbitros** | CRUD completo com seletor de status funcional | ADMIN |
+| **Campeonatos** | CRUD completo com seletor de categoria | ADMIN |
+| **Central de Integridade** | Ranking de risco (APEX) | ADMIN |
+| **Auditoria APEX** | Log de verificações | ADMIN |
+| **Sobre** | Informações do projeto e equipe | Público |
+| **Sucesso** | Confirmação de denúncia com protocolo | USER |
+
+---
+
+## ✅ Funcionalidades
+
+### Autenticação
+- JWT com chave RSA assimétrica (Spring Security)
+- Persistência de sessão com AsyncStorage
+- Roles `ROLE_ADMIN` e `ROLE_USER` com permissões distintas
+- Tela APEX completamente bloqueada para USER (tab escondida + check interno)
+
+### CRUD completo (integrado à API)
+- **Árbitros** — criar, listar, editar (com status ACTIVE/SUSPENDED/INACTIVE), excluir
+- **Campeonatos** — criar, listar, editar (com categoria SUB_13/15/17/20), excluir
+- **Denúncias** — criar (com verificação APEX), listar (filtrada por role), avançar status (NEW → UNDER_REVIEW → RESOLVED), definir veredito (POSITIVE/NEUTRAL/NEGATIVE), excluir
+
+### Filtro de visão USER vs ADMIN
+- **USER** vê apenas as próprias denúncias, consumindo o endpoint `/minhas/{email}` do APEX
+- **ADMIN** vê todas as denúncias do sistema, consumindo `/reports` do Spring Boot
+- Tela de Protocolos tem título e contador dinâmicos ("Meus Protocolos" vs "Todas as Denúncias")
+- Filtros por status (Novas / Em análise / Resolvidas / Todas) com chips horizontais
+
+### Tema claro/escuro
+- Implementado via Context API (`ThemeContext`)
+- Alternância manual pelo botão na tela Sobre
+- Todas as telas usam `useTheme()` — zero cores hardcoded
+
+### Estados de carregamento
+- Indicators em todas as queries
+- Invalidação automática via TanStack Query (`invalidateQueries`)
+- Pull-to-refresh nas listas
+
+---
+
+## 💾 Stack Técnica
+
+### Mobile
+- **React Native** + **Expo** ~52
+- **Expo Router** ~4 (navegação declarativa)
+- **TanStack Query** (estado assíncrono)
+- **Axios** (HTTP client com interceptor JWT)
+- **AsyncStorage** (persistência de sessão)
+- **Ionicons** (ícones)
+
+### Backend API (projeto separado)
+- **Spring Boot 3** (Java 17)
+- **Spring Security + OAuth2 Resource Server** (JWT RSA)
+- **Spring Data JPA** + **Oracle Database**
+- **Flyway** (versionamento do schema)
+- **HATEOAS** (Richardson Maturity Model Level 3)
+- **Swagger / OpenAPI**
+- Repositório: [knowball-oracle/knowball-api](https://github.com/knowball-oracle/knowball-api)
+
+### Oracle APEX
+- **Oracle Autonomous Database** (Free Tier)
+- **PL/SQL** (procedure de scoring)
+- **ORDS** (exposição REST dos endpoints)
+
+---
+
+## 🏛️ Arquitetura do Código Mobile
+
+```
+KnowballApp/
+├── app/                         # Telas (Expo Router)
+│   ├── _layout.jsx              # Tab navigator + providers
+│   ├── index.jsx                # Home
+│   ├── login.jsx
+│   ├── register.jsx
+│   ├── auth.jsx                 # Dashboard do usuário logado
+│   ├── denuncia.jsx             # Fluxo APEX-first
+│   ├── user.jsx                 # Confirmação com protocolo
+│   ├── historico.jsx            # Protocolos com filtro USER/ADMIN
+│   ├── arbitros.jsx             # CRUD árbitros
+│   ├── campeonatos.jsx          # CRUD campeonatos
+│   ├── apex.jsx                 # Central de Integridade (ranking)
+│   ├── auditoria.jsx            # Log de verificações APEX
+│   └── sobre.jsx                # Sobre + alternador de tema
+├── services/                    # Camada de acesso HTTP
+│   ├── api.js                   # Instância axios + interceptor JWT
+│   ├── authService.js           # Login / register / logout
+│   ├── apexService.js           # 5 endpoints do Oracle APEX
+│   ├── reportService.js         # CRUD denúncias (Spring Boot)
+│   ├── refereeService.js        # CRUD árbitros (Spring Boot)
+│   ├── championshipService.js   # CRUD campeonatos (Spring Boot)
+│   └── gameService.js           # Partidas e participações
+├── context/                     # Estado global
+│   ├── AuthContext.jsx          # Token, email, role, isAdmin
+│   └── ThemeContext.jsx         # Tema claro/escuro
+└── providers/
+    └── QueryProvider.jsx        # TanStack Query client
+```
+
+**Separação de responsabilidades:** telas não contêm chamadas HTTP nem regras de negócio. Tudo passa pelos services. Hooks do TanStack Query isolados em cada tela consumindo os services.
+
+---
+
+## 🚀 Como Executar
+
+### Pré-requisitos
+- Node.js 18+
+- Expo Go no celular **ou** Android Studio com emulador
+- **API Spring Boot rodando localmente** ([knowball-api](https://github.com/knowball-oracle/knowball-api))
+- Conexão com Oracle APEX (já hospedado no Oracle Cloud, URL hardcoded no `apexService.js`)
+
+### 1. Subir a API Spring Boot
+
+```bash
+git clone https://github.com/knowball-oracle/knowball-api.git
+cd knowball-api
+./mvnw spring-boot:run
+```
+
+A API sobe em `http://localhost:8080`. O Flyway cria o schema automaticamente. Confira em `http://localhost:8080/swagger-ui.html`.
+
+### 2. Subir o app mobile
+
+```bash
+git clone https://github.com/knowball-oracle/KnowballApp.git
+cd KnowballApp
+npm install
+npx expo start
+```
+
+Pressione `a` para abrir no emulador Android. A URL `http://10.0.2.2:8080` no `services/api.js` é o alias que o emulador usa pra acessar o `localhost` do host.
+
+> ⚠️ Se for rodar em celular físico via Expo Go, troque `10.0.2.2` pelo IP da sua máquina na rede local (`ipconfig` no Windows, `ifconfig` no Linux/Mac).
+
+### 3. Credenciais iniciais
+
+A API cria automaticamente um usuário ADMIN e um USER via Flyway (ver `src/main/resources/db/migration` no knowball-api). Consulte o repositório da API para as credenciais.
 
 ---
 
 ## 🎥 Demonstração em Vídeo
 
-**Assista à demonstração completa das funcionalidades:**  
-[🎬 Vídeo no YouTube](https://www.youtube.com/watch?v=B3ITeh9_UTI)
+[🎬 Assista no YouTube](https://youtu.be/SEU-LINK-AQUI)
 
-**Demonstrado no vídeo:**
-- ✅ Criação de denúncias (POST)
-- ✅ Validações de formulário
-- ✅ Listagem de denúncias (GET)
-- ✅ Exclusão de denúncias (DELETE)
-- ✅ Autenticação administrativa
-- ✅ Pull-to-refresh
-- ✅ Navegação completa
-- ✅ CRUD funcional integrado com API
+**Tópicos demonstrados:**
+- Autenticação JWT real com persistência
+- Denúncia bloqueada pelo Oracle APEX em tempo real
+- Protocolo oficial gerado via sequence PL/SQL
+- Central de Integridade com ranking de risco
+- Auditoria de verificações
+- CRUD completo de árbitros e campeonatos
+- Filtro USER vs ADMIN na tela de protocolos
+- Avanço de status com veredito da comissão
+- Tema claro/escuro
 
 ---
 
-## 👥 Equipe de Desenvolvimento
+## 👥 Equipe DevAvatar
 
 | Nome | RM | GitHub | LinkedIn |
-|------|-------|---------|----------|
+|---|---|---|---|
 | **Patrick Castro Quintana** | RM559271 | [@castropatrick](https://github.com/castropatrick) | [LinkedIn](https://www.linkedin.com/in/patrick-castro-839aa2273/) |
-| **Gabriel Oliveira Rossi** | RM560967 | [@gabrielrossi01](https://github.com/gabrielrossi01) | [LinkedIn](https://www.linkedin.com/in/gabriel-oliveira-rossi-155baa324/) |
+| **Gabriel Oliveira Rossi** | RM560967 | [@GabrielRossi01](https://github.com/GabrielRossi01) | [LinkedIn](https://www.linkedin.com/in/gabriel-oliveira-rossi-155baa324/) |
 | **Rodrigo Naoki Yamasaki** | RM560759 | [@RodrygoYamasaki](https://github.com/RodrygoYamasaki) | [LinkedIn](https://www.linkedin.com/in/rodrigo-yamasaki-74a3b1324/) |
 
 ---
 
-## 🏫 Instituição
+## 🏫 Contexto Acadêmico
 
-**FIAP – Mobile Application Development (2025)**  
-**Professor:** Fernando Pinéo de Abreu
-
-Projeto desenvolvido como parte da disciplina de **Mobile Application Development**, com foco em:
-- Integração com API REST (40 pontos)
-- Protótipo funcional completo (20 pontos)
-- Arquitetura de código profissional (20 pontos)
-- Demonstração em vídeo (20 pontos)
+**FIAP** — Mobile Application Development — **Sprint 3 (2026)**
 
 ---
 
-## ✨ Destaques Técnicos
+## 📄 Licença
 
-### **Integração com API:**
-- Requisições HTTP reais (GET, POST, DELETE)
-- Tratamento de erros e timeout
-- Loading states em todas operações
-- Feedback visual constante ao usuário
+Projeto acadêmico. Sem fins comerciais.
 
-### **Validações:**
-- Email (formato válido)
-- Data (formato DD/MM/AAAA)
-- Campos obrigatórios
-- Contador de caracteres no relato
-
-### **UX/UI:**
-- Design responsivo e profissional
-- Paleta de cores consistente
-- Ícones intuitivos (Ionicons)
-- Animações e transições suaves
-- Pull-to-refresh nativo
-
----
-
-## 📊 Funcionalidades CRUD
-
-| Operação | Método HTTP | Implementado | Tela |
-|----------|-------------|--------------|------|
-| **Create** | POST | ✅ | denuncia.jsx |
-| **Read** | GET | ✅ | historico.jsx, auth.jsx |
-| **Update** | PUT | ⚪ | - |
-| **Delete** | DELETE | ✅ | historico.jsx |
-
----
-
-## 🏁 Licença
-
-Este projeto é de uso acadêmico e não possui fins comerciais.
-
-© 2025 – **Knowball** | FIAP | Oracle
-
----
-
-## 🚀 Melhorias Futuras
-
-- [ ] Autenticação JWT real
-- [ ] Upload de evidências (fotos/vídeos)
-- [ ] Sistema de notificações
-- [ ] Dashboard de estatísticas
-- [ ] Exportação de relatórios
-- [ ] Atualização de denúncias (PUT)
-- [ ] Filtros e busca avançada
-- [ ] Testes automatizados
-
----
-
-**🦤🦤Desenvolvido pela equipe Knowball**
+© 2026 — **Knowball** | FIAP | Oracle
