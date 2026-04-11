@@ -9,3 +9,7 @@ export async function buscarPartidaPorId(id) {
   const response = await api.get(`/games/${id}`);
   return response.data;
 }
+export async function listarParticipacoesPorPartida(gameId) {
+  const response = await api.get(`/participations/game/${gameId}`);
+  return response.data._embedded?.participationList || [];
+}
