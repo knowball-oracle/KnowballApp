@@ -19,11 +19,17 @@ export async function verificarElegibilidade(arbitroId) {
   return data;
 }
 
-export async function registrarDenunciaApex(arbitroId, nomeArbitro, conteudo) {
+export async function buscarMinhasDenuncias(email) {
+  const { data } = await apexApi.get(`/minhas/${encodeURIComponent(email)}`);
+  return data.items || [];
+}
+
+export async function registrarDenunciaApex(arbitroId, nomeArbitro, conteudo, email) {
   const { data } = await apexApi.post("/registrar", {
     arbitro_id: arbitroId,
     nome_arbitro: nomeArbitro,
     conteudo,
+    email,
   });
   return data;
 }
@@ -37,3 +43,5 @@ export async function buscarRanking() {
   const { data } = await apexApi.get("/ranking");
   return data.items || [];
 }
+
+

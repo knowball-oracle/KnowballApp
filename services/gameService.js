@@ -13,3 +13,5 @@ export async function listarParticipacoesPorPartida(gameId) {
   const response = await api.get(`/participations/game/${gameId}`);
   return response.data._embedded?.participationList || [];
 }
+
+

@@ -1,39 +1,23 @@
-import {
-  Text,
-  TextInput,
-  StyleSheet,
-  View,
-  TouchableOpacity,
-  Alert,
-  ScrollView,
-  ActivityIndicator,
-} from "react-native";
+import { Text, TextInput, StyleSheet, View, TouchableOpacity, Alert, ScrollView, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { criarDenuncia } from "../services/reportService";
-import {
-  listarPartidas,
-  listarParticipacoesPorPartida,
-} from "../services/gameService";
+import { listarPartidas } from "../services/gameService";
 import { listarArbitrosPorPartida } from "../services/refereeService";
-import {
-  verificarElegibilidade,
-  registrarDenunciaApex,
-} from "../services/apexService";
+import { verificarElegibilidade, registrarDenunciaApex } from "../services/apexService";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 
 export default function Denuncia() {
-  const { token, userName } = useAuth();
+  const { token, userName, userEmail } = useAuth();
   const { cores } = useTheme();
   const queryClient = useQueryClient();
 
   const [gameId, setGameId] = useState(null);
   const [refereeId, setRefereeId] = useState(null);
-  const [refereeNome, setRefereeNome] = useState("");
   const [relato, setRelato] = useState("");
   const [verificando, setVerificando] = useState(false);
   const [resultadoApex, setResultadoApex] = useState(null);
@@ -43,30 +27,33 @@ export default function Denuncia() {
     queryFn: listarPartidas,
     enabled: !!token,
   });
+
   const { data: arbitros = [], isLoading: loadingArbitros } = useQuery({
     queryKey: ["arbitrosPorPartida", gameId],
     queryFn: () => listarArbitrosPorPartida(gameId),
     enabled: !!gameId,
   });
-  const { data: participacoes = [] } = useQuery({
-    queryKey: ["participacoes", gameId],
-    queryFn: () => listarParticipacoesPorPartida(gameId),
-    enabled: !!gameId,
-  });
+
+  function selecionarPartida(p) {
+    setGameId(p.id);
+    setRefereeId(null);
+    setResultadoApex(null);
+  }
 
   function selecionarArbitro(a) {
     setRefereeId(a.id);
-    setRefereeNome(a.name);
     setResultadoApex(null);
   }
 
   async function handleEnviar() {
     if (!gameId) return Alert.alert("Atenção", "Selecione uma partida");
     if (!refereeId) return Alert.alert("Atenção", "Selecione um árbitro");
-    if (relato.trim().length < 20)
+    if (relato.trim().length < 20) {
       return Alert.alert("Atenção", "Relato deve ter pelo menos 20 caracteres");
+    }
 
     setVerificando(true);
+
     let elegibilidade;
     try {
       elegibilidade = await verificarElegibilidade(refereeId);
@@ -75,7 +62,7 @@ export default function Denuncia() {
       setVerificando(false);
       return Alert.alert(
         "Oracle APEX indisponível",
-        "Não é possível registrar denúncias sem o sistema de verificação anti-manipulação. Tente novamente mais tarde.",
+        "Não é possível registrar denúncias sem o sistema de verificação anti-manipulação. Tente novamente mais tarde."
       );
     }
 
@@ -83,16 +70,13 @@ export default function Denuncia() {
       setVerificando(false);
       return Alert.alert(
         "🔴 Árbitro Bloqueado pelo APEX",
-        `${elegibilidade.nome} possui score de risco ${elegibilidade.score}/100 (${elegibilidade.total_denuncias} denúncias). Novas denúncias estão temporariamente suspensas para este árbitro até análise da comissão.`,
+        `${elegibilidade.nome} possui score de risco ${elegibilidade.score}/100 (${elegibilidade.total_denuncias} denúncias). Novas denúncias estão temporariamente suspensas para este árbitro até análise da comissão.`
       );
     }
 
     try {
-      const apexResp = await registrarDenunciaApex(
-        refereeId,
-        elegibilidade.nome,
-        relato.trim(),
-      );
+      const apexResp = await registrarDenunciaApex(refereeId, elegibilidade.nome, relato.trim(), userEmail);
+
       await criarDenuncia({
         game: { id: gameId },
         referee: { id: refereeId },
@@ -102,9 +86,12 @@ export default function Denuncia() {
         status: "NEW",
         analysisResult: "NEUTRAL",
       });
+
       queryClient.invalidateQueries({ queryKey: ["denuncias"] });
+      queryClient.invalidateQueries({ queryKey: ["minhasDenuncias", userEmail] });
       queryClient.invalidateQueries({ queryKey: ["auditoriaApex"] });
       queryClient.invalidateQueries({ queryKey: ["rankingApex"] });
+
       router.push({
         pathname: "/user",
         params: { nome: userName, protocolo: apexResp.protocolo },
@@ -120,11 +107,15 @@ export default function Denuncia() {
     return `${p.place} — ${p.championship?.category}`;
   }
 
+  function getCorStatus(status) {
+    if (status === "BLOQUEADO") return "#d62828";
+    if (status === "ALERTA") return "#f4a261";
+    return "#2a9d8f";
+  }
+
   if (!token) {
     return (
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: cores.fundo }]}
-      >
+      <SafeAreaView style={[styles.container, { backgroundColor: cores.fundo }]}>
         <View style={styles.center}>
           <Text style={{ color: cores.textoSecundario, marginBottom: 20 }}>
             Faça login para denunciar
@@ -142,9 +133,7 @@ export default function Denuncia() {
 
   if (loadingPartidas) {
     return (
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: cores.fundo }]}
-      >
+      <SafeAreaView style={[styles.container, { backgroundColor: cores.fundo }]}>
         <View style={styles.center}>
           <ActivityIndicator size="large" color={cores.primario} />
         </View>
@@ -152,133 +141,81 @@ export default function Denuncia() {
     );
   }
 
-  const corStatus =
-    resultadoApex?.status === "BLOQUEADO"
-      ? "#d62828"
-      : resultadoApex?.status === "ALERTA"
-        ? "#f4a261"
-        : "#2a9d8f";
+  const corStatus = getCorStatus(resultadoApex?.status);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: cores.fundo }]}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Text style={[styles.title, { color: cores.texto }]}>
-          Nova Denúncia
-        </Text>
+        <Text style={[styles.title, { color: cores.texto }]}>Nova Denúncia</Text>
         <Text style={[styles.usuario, { color: cores.textoMuted }]}>
           Denunciante: {userName}
         </Text>
 
-        <Text style={[styles.label, { color: cores.textoSecundario }]}>
-          Partida:
-        </Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={{ marginBottom: 15 }}
-        >
-          {partidas.map((p) => (
-            <TouchableOpacity
-              key={p.id}
-              style={[
-                styles.chip,
-                { backgroundColor: cores.fundoCard, borderColor: cores.borda },
-                gameId === p.id && {
-                  backgroundColor: cores.primario,
-                  borderColor: cores.primario,
-                },
-              ]}
-              onPress={() => {
-                setGameId(p.id);
-                setRefereeId(null);
-                setResultadoApex(null);
-              }}
-            >
-              <Text
-                style={{ color: cores.texto, fontWeight: "bold", fontSize: 13 }}
+        <Text style={[styles.label, { color: cores.textoSecundario }]}>Partida:</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollChips}>
+          {partidas.map((p) => {
+            const ativo = gameId === p.id;
+            return (
+              <TouchableOpacity
+                key={p.id}
+                style={[
+                  styles.chip,
+                  { backgroundColor: cores.fundoCard, borderColor: cores.borda },
+                  ativo && { backgroundColor: cores.primario, borderColor: cores.primario },
+                ]}
+                onPress={() => selecionarPartida(p)}
               >
-                {getNomePartida(p)}
-              </Text>
-            </TouchableOpacity>
-          ))}
+                <Text style={[styles.chipText, { color: ativo ? "#fff" : cores.texto }]}>
+                  {getNomePartida(p)}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </ScrollView>
 
         {gameId && (
           <>
-            <Text style={[styles.label, { color: cores.textoSecundario }]}>
-              Árbitro:
-            </Text>
+            <Text style={[styles.label, { color: cores.textoSecundario }]}>Árbitro:</Text>
             {loadingArbitros ? (
-              <ActivityIndicator color={cores.primario} />
+              <ActivityIndicator color={cores.primario} style={{ marginBottom: 15 }} />
             ) : (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={{ marginBottom: 15 }}
-              >
-                {arbitros.map((a) => (
-                  <TouchableOpacity
-                    key={a.id}
-                    style={[
-                      styles.chip,
-                      {
-                        backgroundColor: cores.fundoCard,
-                        borderColor: cores.borda,
-                      },
-                      refereeId === a.id && {
-                        backgroundColor: cores.primario,
-                        borderColor: cores.primario,
-                      },
-                    ]}
-                    onPress={() => selecionarArbitro(a)}
-                  >
-                    <Text
-                      style={{
-                        color: cores.texto,
-                        fontWeight: "bold",
-                        fontSize: 13,
-                      }}
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollChips}>
+                {arbitros.map((a) => {
+                  const ativo = refereeId === a.id;
+                  return (
+                    <TouchableOpacity
+                      key={a.id}
+                      style={[
+                        styles.chip,
+                        { backgroundColor: cores.fundoCard, borderColor: cores.borda },
+                        ativo && { backgroundColor: cores.primario, borderColor: cores.primario },
+                      ]}
+                      onPress={() => selecionarArbitro(a)}
                     >
-                      {a.name}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                      <Text style={[styles.chipText, { color: ativo ? "#fff" : cores.texto }]}>
+                        {a.name}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </ScrollView>
             )}
           </>
         )}
 
         {resultadoApex && (
-          <View
-            style={[
-              styles.apexCard,
-              { borderColor: corStatus, backgroundColor: cores.fundoCard },
-            ]}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 8,
-                marginBottom: 8,
-              }}
-            >
+          <View style={[styles.apexCard, { borderColor: corStatus, backgroundColor: cores.fundoCard }]}>
+            <View style={styles.apexHeader}>
               <Ionicons name="shield-checkmark" size={20} color={corStatus} />
-              <Text style={{ color: corStatus, fontWeight: "bold" }}>
+              <Text style={[styles.apexTitle, { color: corStatus }]}>
                 Oracle APEX — Verificação
               </Text>
             </View>
-            <Text style={{ color: cores.texto }}>
-              Score de risco:{" "}
-              <Text style={{ fontWeight: "bold", color: corStatus }}>
-                {resultadoApex.score}/100
-              </Text>
+            <Text style={{ color: cores.texto, marginBottom: 4 }}>
+              Score de risco: <Text style={{ fontWeight: "bold", color: corStatus }}>{resultadoApex.score}/100</Text>
             </Text>
-            <Text style={{ color: cores.texto }}>
-              Status:{" "}
-              <Text style={{ fontWeight: "bold", color: corStatus }}>
-                {resultadoApex.status}
-              </Text>
+            <Text style={{ color: cores.texto, marginBottom: 4 }}>
+              Status: <Text style={{ fontWeight: "bold", color: corStatus }}>{resultadoApex.status}</Text>
             </Text>
             <Text style={{ color: cores.textoMuted, fontSize: 12 }}>
               {resultadoApex.total_denuncias} denúncia(s) registrada(s)
@@ -287,14 +224,7 @@ export default function Denuncia() {
         )}
 
         <TextInput
-          style={[
-            styles.input,
-            {
-              backgroundColor: cores.input,
-              color: cores.texto,
-              borderColor: cores.borda,
-            },
-          ]}
+          style={[styles.input, { backgroundColor: cores.input, color: cores.texto, borderColor: cores.borda }]}
           placeholder="Relato (mínimo 20 caracteres)"
           placeholderTextColor={cores.textoMuted}
           value={relato}
@@ -302,14 +232,7 @@ export default function Denuncia() {
           multiline
           textAlignVertical="top"
         />
-        <Text
-          style={{
-            color: cores.textoMuted,
-            fontSize: 12,
-            textAlign: "right",
-            marginBottom: 15,
-          }}
-        >
+        <Text style={[styles.contador, { color: cores.textoMuted }]}>
           {relato.length} caracteres
         </Text>
 
@@ -319,9 +242,7 @@ export default function Denuncia() {
           disabled={verificando}
         >
           {verificando ? (
-            <View
-              style={{ flexDirection: "row", gap: 8, alignItems: "center" }}
-            >
+            <View style={styles.loadingRow}>
               <ActivityIndicator color="#fff" />
               <Text style={styles.botaoText}>Consultando Oracle APEX...</Text>
             </View>
@@ -359,11 +280,18 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginTop: 5,
   },
+  scrollChips: {
+    marginBottom: 15,
+  },
   chip: {
     padding: 10,
     borderRadius: 8,
     marginRight: 10,
     borderWidth: 1,
+  },
+  chipText: {
+    fontWeight: "bold",
+    fontSize: 13,
   },
   apexCard: {
     padding: 15,
@@ -371,12 +299,26 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     marginBottom: 15,
   },
+  apexHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 8,
+  },
+  apexTitle: {
+    fontWeight: "bold",
+  },
   input: {
     padding: 15,
     borderRadius: 8,
     borderWidth: 1,
     height: 110,
     marginBottom: 5,
+  },
+  contador: {
+    fontSize: 12,
+    textAlign: "right",
+    marginBottom: 15,
   },
   botao: {
     padding: 16,
@@ -388,5 +330,10 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
+  },
+  loadingRow: {
+    flexDirection: "row",
+    gap: 8,
+    alignItems: "center",
   },
 });

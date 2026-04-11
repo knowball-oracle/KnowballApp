@@ -1,17 +1,14 @@
-import {Text,TextInput,StyleSheet, View,FlatList,TouchableOpacity,Alert,ActivityIndicator, Modal,} from "react-native";
+import { Text, TextInput, StyleSheet, View, FlatList, TouchableOpacity, Alert, ActivityIndicator, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  listarArbitros,
-  criarArbitro,
-  atualizarArbitro,
-  excluirArbitro,
-} from "../services/refereeService";
+import { listarArbitros, criarArbitro, atualizarArbitro, excluirArbitro } from "../services/refereeService";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
+
+const STATUS_OPCOES = ["ACTIVE", "SUSPENDED", "INACTIVE"];
 
 export default function Arbitros() {
   const queryClient = useQueryClient();
@@ -22,6 +19,7 @@ export default function Arbitros() {
   const [editando, setEditando] = useState(null);
   const [nome, setNome] = useState("");
   const [dataNascimento, setDataNascimento] = useState("");
+  const [status, setStatus] = useState("ACTIVE");
 
   const { data: arbitros = [], isLoading, refetch } = useQuery({
     queryKey: ["arbitros"],
@@ -62,6 +60,7 @@ export default function Arbitros() {
     setEditando(null);
     setNome("");
     setDataNascimento("");
+    setStatus("ACTIVE");
     setModalVisivel(true);
   }
 
@@ -69,6 +68,7 @@ export default function Arbitros() {
     setEditando(a);
     setNome(a.name);
     setDataNascimento(a.birthDate);
+    setStatus(a.status || "ACTIVE");
     setModalVisivel(true);
   }
 
@@ -77,17 +77,17 @@ export default function Arbitros() {
     setEditando(null);
     setNome("");
     setDataNascimento("");
+    setStatus("ACTIVE");
   }
 
   function salvar() {
     if (!nome.trim()) return Alert.alert("Atenção", "Digite o nome do árbitro");
-    if (!dataNascimento.trim())
-      return Alert.alert("Atenção", "Digite a data de nascimento");
+    if (!dataNascimento.trim()) return Alert.alert("Atenção", "Digite a data de nascimento");
 
     const dados = {
       name: nome.trim(),
       birthDate: dataNascimento.trim(),
-      status: "ACTIVE",
+      status: status,
     };
 
     if (editando) {
@@ -100,33 +100,22 @@ export default function Arbitros() {
   function excluir(id) {
     Alert.alert("Confirmar", "Deseja excluir este árbitro?", [
       { text: "Cancelar" },
-      {
-        text: "Excluir",
-        style: "destructive",
-        onPress: () => mExcluir.mutate(id),
-      },
+      { text: "Excluir", style: "destructive", onPress: () => mExcluir.mutate(id) },
     ]);
+  }
+
+  function getCorStatus(s) {
+    if (s === "ACTIVE") return "#2a9d8f";
+    if (s === "SUSPENDED") return "#f4a261";
+    return "#888";
   }
 
   if (!token) {
     return (
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: cores.fundo }]}
-      >
+      <SafeAreaView style={[styles.container, { backgroundColor: cores.fundo }]}>
         <View style={styles.center}>
-          <Ionicons
-            name="lock-closed-outline"
-            size={60}
-            color={cores.textoMuted}
-          />
-          <Text
-            style={{
-              color: cores.textoSecundario,
-              marginTop: 20,
-              marginBottom: 20,
-              textAlign: "center",
-            }}
-          >
+          <Ionicons name="lock-closed-outline" size={60} color={cores.textoMuted} />
+          <Text style={[styles.aviso, { color: cores.textoSecundario }]}>
             Faça login para acessar esta área
           </Text>
           <TouchableOpacity
@@ -142,9 +131,7 @@ export default function Arbitros() {
 
   if (isLoading) {
     return (
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: cores.fundo }]}
-      >
+      <SafeAreaView style={[styles.container, { backgroundColor: cores.fundo }]}>
         <View style={styles.center}>
           <ActivityIndicator size="large" color={cores.primario} />
           <Text style={{ color: cores.textoMuted, marginTop: 10 }}>
@@ -159,7 +146,7 @@ export default function Arbitros() {
     <SafeAreaView style={[styles.container, { backgroundColor: cores.fundo }]}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: cores.texto }]}>Árbitros</Text>
-        <Text style={{ color: cores.textoMuted, fontSize: 13, marginTop: 4 }}>
+        <Text style={[styles.subtitle, { color: cores.textoMuted }]}>
           {arbitros.length} cadastrado(s)
         </Text>
       </View>
@@ -181,31 +168,24 @@ export default function Arbitros() {
         onRefresh={refetch}
         contentContainerStyle={{ padding: 20 }}
         renderItem={({ item }) => (
-          <View
-            style={[
-              styles.card,
-              { backgroundColor: cores.fundoCard, borderColor: cores.borda },
-            ]}
-          >
+          <View style={[styles.card, { backgroundColor: cores.fundoCard, borderColor: cores.borda }]}>
             <View style={{ flex: 1 }}>
               <Text style={[styles.nomeArbitro, { color: cores.texto }]}>
                 {item.name}
               </Text>
-              <Text style={{ color: cores.textoMuted, fontSize: 13 }}>
+              <Text style={[styles.infoArbitro, { color: cores.textoMuted }]}>
                 Nascimento: {item.birthDate}
               </Text>
-              <Text style={{ color: cores.textoMuted, fontSize: 13 }}>
-                Status: {item.status}
-              </Text>
+              <View style={styles.statusRow}>
+                <View style={[styles.statusBadge, { backgroundColor: getCorStatus(item.status) }]}>
+                  <Text style={styles.statusBadgeText}>{item.status}</Text>
+                </View>
+              </View>
             </View>
             {isAdmin() && (
-              <View style={{ flexDirection: "row", gap: 10 }}>
+              <View style={styles.acoes}>
                 <TouchableOpacity onPress={() => abrirEditar(item)}>
-                  <Ionicons
-                    name="pencil-outline"
-                    size={22}
-                    color={cores.primario}
-                  />
+                  <Ionicons name="pencil-outline" size={22} color={cores.primario} />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => excluir(item.id)}>
                   <Ionicons name="trash-outline" size={22} color="#ff4444" />
@@ -218,22 +198,13 @@ export default function Arbitros() {
 
       <Modal visible={modalVisivel} transparent animationType="slide">
         <View style={styles.modalOverlay}>
-          <View
-            style={[styles.modalBox, { backgroundColor: cores.fundoCard }]}
-          >
+          <View style={[styles.modalBox, { backgroundColor: cores.fundoCard }]}>
             <Text style={[styles.modalTitle, { color: cores.texto }]}>
               {editando ? "Editar Árbitro" : "Novo Árbitro"}
             </Text>
 
             <TextInput
-              style={[
-                styles.input,
-                {
-                  backgroundColor: cores.input,
-                  color: cores.texto,
-                  borderColor: cores.borda,
-                },
-              ]}
+              style={[styles.input, { backgroundColor: cores.input, color: cores.texto, borderColor: cores.borda }]}
               placeholder="Nome do árbitro"
               placeholderTextColor={cores.textoMuted}
               value={nome}
@@ -241,19 +212,34 @@ export default function Arbitros() {
             />
 
             <TextInput
-              style={[
-                styles.input,
-                {
-                  backgroundColor: cores.input,
-                  color: cores.texto,
-                  borderColor: cores.borda,
-                },
-              ]}
+              style={[styles.input, { backgroundColor: cores.input, color: cores.texto, borderColor: cores.borda }]}
               placeholder="Data de nascimento (AAAA-MM-DD)"
               placeholderTextColor={cores.textoMuted}
               value={dataNascimento}
               onChangeText={setDataNascimento}
             />
+
+            <Text style={[styles.label, { color: cores.textoSecundario }]}>Status:</Text>
+            <View style={styles.statusOpcoes}>
+              {STATUS_OPCOES.map((s) => {
+                const ativo = status === s;
+                return (
+                  <TouchableOpacity
+                    key={s}
+                    style={[
+                      styles.chipStatus,
+                      { backgroundColor: cores.input, borderColor: cores.borda },
+                      ativo && { backgroundColor: getCorStatus(s), borderColor: getCorStatus(s) },
+                    ]}
+                    onPress={() => setStatus(s)}
+                  >
+                    <Text style={[styles.chipStatusText, { color: ativo ? "#fff" : cores.texto }]}>
+                      {s}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
 
             <TouchableOpacity
               style={[styles.btnPrim, { backgroundColor: cores.primario }]}
@@ -273,7 +259,7 @@ export default function Arbitros() {
               style={[styles.btnCancel, { borderColor: cores.borda }]}
               onPress={fechar}
             >
-              <Text style={{ color: cores.textoMuted, fontWeight: "600" }}>
+              <Text style={[styles.btnCancelText, { color: cores.textoMuted }]}>
                 Cancelar
               </Text>
             </TouchableOpacity>
@@ -294,6 +280,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 40,
   },
+  aviso: {
+    marginTop: 20,
+    marginBottom: 20,
+    textAlign: "center",
+  },
   header: {
     padding: 20,
     paddingBottom: 10,
@@ -301,6 +292,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
+  },
+  subtitle: {
+    fontSize: 13,
+    marginTop: 4,
   },
   btnAdd: {
     flexDirection: "row",
@@ -329,6 +324,28 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 5,
   },
+  infoArbitro: {
+    fontSize: 13,
+    marginBottom: 6,
+  },
+  statusRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  statusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  statusBadgeText: {
+    color: "#fff",
+    fontSize: 11,
+    fontWeight: "bold",
+  },
+  acoes: {
+    flexDirection: "row",
+    gap: 12,
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.8)",
@@ -352,6 +369,27 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     fontSize: 15,
   },
+  label: {
+    fontSize: 14,
+    marginBottom: 8,
+    fontWeight: "600",
+  },
+  statusOpcoes: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 20,
+    flexWrap: "wrap",
+  },
+  chipStatus: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  chipStatusText: {
+    fontWeight: "600",
+    fontSize: 12,
+  },
   btnPrim: {
     padding: 16,
     borderRadius: 8,
@@ -368,5 +406,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
     borderWidth: 1,
+  },
+  btnCancelText: {
+    fontWeight: "600",
   },
 });

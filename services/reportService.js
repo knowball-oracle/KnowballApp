@@ -2,7 +2,7 @@ import api from "./api";
 
 export async function listarDenuncias() {
   const response = await api.get("/reports");
-  return response.data._embedded.reportList;
+  return response.data._embedded?.reportList || [];
 }
 
 export async function buscarDenunciaPorId(id) {
@@ -15,8 +15,11 @@ export async function criarDenuncia(denuncia) {
   return response.data;
 }
 
-export async function atualizarStatusDenuncia(id, status) {
-  const response = await api.put(`/reports/${id}/status`, { status });
+export async function atualizarStatusDenuncia(id, status, analysisResultType = "NEUTRAL") {
+  const response = await api.put(`/reports/${id}/status`, {
+    status,
+    analysisResultType,
+  });
   return response.data;
 }
 

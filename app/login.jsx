@@ -11,7 +11,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
-  const { setToken, setUserName, setUserRole } = useAuth();
+  const { setToken, setUserName, setUserEmail, setUserRole } = useAuth();
   const { cores } = useTheme();
 
   async function handleLogin() {
@@ -23,6 +23,7 @@ export default function Login() {
       const data = await login(email.trim(), senha);
       setToken(data.token);
       setUserName(data.name);
+      setUserEmail(email.trim());
       setUserRole(data.role);
       router.replace("/auth");
     } catch (error) {

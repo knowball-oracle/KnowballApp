@@ -20,7 +20,7 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
-  const { setToken, setUserName, setUserRole } = useAuth();
+  const { setToken, setUserName, setUserEmail, setUserRole } = useAuth();
   const { cores } = useTheme();
 
   async function handleRegister() {
@@ -34,6 +34,7 @@ export default function Register() {
       const data = await register(nome.trim(), email.trim(), senha);
       setToken(data.token);
       setUserName(data.name);
+      setUserEmail(email.trim());
       setUserRole(data.role);
       router.replace("/auth");
     } catch (error) {

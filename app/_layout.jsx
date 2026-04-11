@@ -1,11 +1,12 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { AuthProvider } from "../context/AuthContext";
+import { AuthProvider, useAuth } from "../context/AuthContext";
 import { ThemeProvider, useTheme } from "../context/ThemeContext";
 import QueryProvider from "../providers/QueryProvider";
 
 function TabsComTema() {
   const { cores } = useTheme();
+  const { isAdmin } = useAuth();
 
   return (
     <Tabs
@@ -87,6 +88,7 @@ function TabsComTema() {
         name="apex"
         options={{
           title: "APEX",
+          href: isAdmin() ? "/apex" : null,
           tabBarIcon: ({ focused, size }) => (
             <Ionicons
               name={focused ? "analytics" : "analytics-outline"}
@@ -97,7 +99,6 @@ function TabsComTema() {
         }}
       />
 
-      {/* Telas escondidas da tab bar */}
       <Tabs.Screen name="sobre" options={{ href: null }} />
       <Tabs.Screen name="denuncia" options={{ href: null }} />
       <Tabs.Screen name="user" options={{ href: null }} />

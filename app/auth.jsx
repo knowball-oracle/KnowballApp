@@ -4,18 +4,28 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { listarDenuncias } from "../services/reportService";
+import { buscarMinhasDenuncias } from "../services/apexService";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 
 export default function Auth() {
-  const { token, userName, isAdmin, fazerLogout } = useAuth();
+  const { token, userName, userEmail, isAdmin, fazerLogout } = useAuth();
   const { cores } = useTheme();
 
-  const { data: denuncias = [], isLoading } = useQuery({
+  const queryAdmin = useQuery({
     queryKey: ["denuncias"],
     queryFn: listarDenuncias,
-    enabled: !!token,
+    enabled: !!token && isAdmin(),
   });
+
+  const queryUser = useQuery({
+    queryKey: ["minhasDenuncias", userEmail],
+    queryFn: () => buscarMinhasDenuncias(userEmail),
+    enabled: !!token && !isAdmin() && !!userEmail,
+  });
+
+  const denuncias = isAdmin() ? queryAdmin.data || [] : queryUser.data || [];
+  const isLoading = isAdmin() ? queryAdmin.isLoading : queryUser.isLoading;
 
   if (!token) {
     return (
@@ -76,7 +86,7 @@ export default function Auth() {
       <View style={[styles.statsCard, { backgroundColor: cores.fundoCard, borderColor: cores.borda }]}>
         <Text style={[styles.statsNumero, { color: cores.primario }]}>{denuncias.length}</Text>
         <Text style={[styles.statsLabel, { color: cores.textoMuted }]}>
-          Denúncias registradas
+          {isAdmin() ? "Denúncias no sistema" : "Suas denúncias"}
         </Text>
       </View>
 
