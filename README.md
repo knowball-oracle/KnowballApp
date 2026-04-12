@@ -4,6 +4,22 @@ Aplicativo mobile para denúncias de manipulação em partidas das categorias de
 
 ---
 
+## 🎥 Demonstração em Vídeo
+
+[🎬 Assista no YouTube](https://youtu.be/watch?v=W-O9P8ZU-WI)
+
+**Tópicos demonstrados:**
+- Autenticação JWT real com persistência
+- Denúncia bloqueada pelo Oracle APEX em tempo real
+- Protocolo oficial gerado via sequence PL/SQL
+- Central de Integridade com ranking de risco
+- Auditoria de verificações
+- CRUD completo de árbitros e campeonatos
+- Filtro USER vs ADMIN na tela de protocolos
+- Avanço de status com veredito da comissão
+- Tema claro/escuro
+
+
 ## 📘 O Problema
 
 Manipulações e fraudes em campeonatos de base (suborno de árbitros, conluio entre equipes, acerto de placares) comprometem a integridade dos torneios, reduzem a motivação dos jovens atletas e afetam a credibilidade dos clubes. Faltam canais estruturados para denúncia segura e mecanismos inteligentes de triagem.
@@ -225,22 +241,6 @@ Pressione `a` para abrir no emulador Android. A URL `http://10.0.2.2:8080` no `s
 
 A API cria automaticamente um usuário ADMIN e um USER via Flyway (ver `src/main/resources/db/migration` no knowball-api). Consulte o repositório da API para as credenciais.
 
----
-
-## 🎥 Demonstração em Vídeo
-
-[🎬 Assista no YouTube](https://youtu.be/SEU-LINK-AQUI)
-
-**Tópicos demonstrados:**
-- Autenticação JWT real com persistência
-- Denúncia bloqueada pelo Oracle APEX em tempo real
-- Protocolo oficial gerado via sequence PL/SQL
-- Central de Integridade com ranking de risco
-- Auditoria de verificações
-- CRUD completo de árbitros e campeonatos
-- Filtro USER vs ADMIN na tela de protocolos
-- Avanço de status com veredito da comissão
-- Tema claro/escuro
 
 ---
 
