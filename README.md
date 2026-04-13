@@ -229,7 +229,7 @@ A API sobe em `http://localhost:8080`. O Flyway cria o schema automaticamente. C
 ```bash
 git clone https://github.com/knowball-oracle/KnowballApp.git
 cd KnowballApp
-npm install
+npm install --legacy-peer-deps
 npx expo start
 ```
 
