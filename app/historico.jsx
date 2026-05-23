@@ -8,6 +8,7 @@ import { listarDenuncias, atualizarStatusDenuncia, excluirDenuncia } from "../se
 import { buscarMinhasDenuncias } from "../services/apexService";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
+import { notificarStatusAvancado, notificarVeredito } from "../services/notificationService";
 
 const FILTROS = [
   { key: "TODOS", label: "Todas" },
@@ -43,13 +44,32 @@ export default function Historico() {
     : denunciasRaw.filter((d) => d.status === filtroAtivo);
 
   const mStatus = useMutation({
-    mutationFn: ({ id, status, analysisResultType }) =>
-      atualizarStatusDenuncia(id, status, analysisResultType),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["denuncias"] });
-    },
-    onError: () => Alert.alert("Erro", "Falha ao atualizar status"),
-  });
+  mutationFn: ({ id, status, analysisResultType }) =>
+    atualizarStatusDenuncia(id, status, analysisResultType),
+  onSuccess: async (data, variables) => {
+    queryClient.invalidateQueries({ queryKey: ["denuncias"] });
+
+    
+    const denuncia = denunciasRaw.find((d) => d.id === variables.id);
+    const protocolo = denuncia?.protocol || `#${variables.id}`;
+    const statusAnterior = denuncia?.status || "NEW";
+
+    
+    if (variables.status === "RESOLVED") {
+      await notificarVeredito({
+        protocolo,
+        veredito: variables.analysisResultType,
+      });
+    } else {
+      await notificarStatusAvancado({
+        protocolo,
+        statusAnterior,
+        statusNovo: variables.status,
+      });
+    }
+  },
+  onError: () => Alert.alert("Erro", "Falha ao atualizar status"),
+});
 
   const mExcluir = useMutation({
     mutationFn: excluirDenuncia,
