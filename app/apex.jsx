@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { buscarRanking } from "../services/apexService";
+import { listarArbitros } from "../services/refereeService";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 
@@ -16,6 +17,25 @@ export default function Apex() {
     queryFn: buscarRanking,
     enabled: isAdmin(),
   });
+
+  
+  const { data: arbitrosSpring = [] } = useQuery({
+    queryKey: ["arbitros"],
+    queryFn: listarArbitros,
+    enabled: isAdmin(),
+  });
+
+  
+  const nomesPorId = {};
+  arbitrosSpring.forEach((a) => {
+    nomesPorId[a.id] = a.name;
+  });
+
+  
+  const rankingEnriquecido = ranking.map((item) => ({
+    ...item,
+    nome_arbitro: nomesPorId[item.id_arbitro] || item.nome_arbitro,
+  }));
 
   if (!isAdmin()) {
     return (
@@ -95,12 +115,12 @@ export default function Apex() {
           Ranking de Risco
         </Text>
 
-        {ranking.length === 0 ? (
+        {rankingEnriquecido.length === 0 ? (
           <Text style={[styles.vazio, { color: cores.textoMuted }]}>
             Nenhuma denúncia registrada
           </Text>
         ) : (
-          ranking.map((item, i) => {
+          rankingEnriquecido.map((item, i) => {
             const cor = getCorScore(item.total_denuncias);
             return (
               <View

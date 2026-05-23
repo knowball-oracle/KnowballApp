@@ -1,18 +1,14 @@
-import {
-  Text,
-  StyleSheet,
-  View,
-  FlatList,
-  ActivityIndicator,
-} from "react-native";
+import {Text, StyleSheet, View, FlatList, ActivityIndicator,} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { buscarAuditoria } from "../services/apexService";
+import { listarArbitros } from "../services/refereeService";
 import { useTheme } from "../context/ThemeContext";
 
 export default function Auditoria() {
   const { cores } = useTheme();
+
   const {
     data: logs = [],
     isLoading,
@@ -21,6 +17,21 @@ export default function Auditoria() {
     queryKey: ["auditoriaApex"],
     queryFn: buscarAuditoria,
   });
+
+  const { data: arbitrosSpring = [] } = useQuery({
+    queryKey: ["arbitros"],
+    queryFn: listarArbitros,
+  });
+
+  const nomesPorId = {};
+  arbitrosSpring.forEach((a) => {
+    nomesPorId[a.id] = a.name;
+  });
+
+  const logsEnriquecidos = logs.map((item) => ({
+    ...item,
+    nome_arbitro: nomesPorId[item.id_arbitro] || item.nome_arbitro,
+  }));
 
   function corStatus(s) {
     return s === "BLOQUEADO"
@@ -45,7 +56,7 @@ export default function Auditoria() {
         <ActivityIndicator color={cores.primario} style={{ marginTop: 30 }} />
       ) : (
         <FlatList
-          data={logs}
+          data={logsEnriquecidos}
           keyExtractor={(i) => i.id.toString()}
           refreshing={isLoading}
           onRefresh={refetch}

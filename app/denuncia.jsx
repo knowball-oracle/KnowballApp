@@ -58,6 +58,13 @@ export default function Denuncia() {
     let elegibilidade;
     try {
       elegibilidade = await verificarElegibilidade(refereeId);
+
+
+      const arbitroSelecionado = arbitros.find((a) => a.id === refereeId);
+      if (arbitroSelecionado) {
+        elegibilidade.nome = arbitroSelecionado.name;
+      }
+
       setResultadoApex(elegibilidade);
     } catch (e) {
       setVerificando(false);
