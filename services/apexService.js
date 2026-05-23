@@ -5,6 +5,7 @@ const APEX_BASE =
 
 const apexApi = axios.create({
   baseURL: APEX_BASE,
+  timeout: 30000,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -13,6 +14,26 @@ const apexApi = axios.create({
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
   },
 });
+
+apexApi.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const config = error.config;
+    const isRetryable =
+      error.code === "ECONNABORTED" ||
+      error.code === "ERR_NETWORK" ||
+      !error.response;
+
+    if (isRetryable && !config._retry) {
+      config._retry = true;
+      console.log("[APEX] retry após falha:", error.code);
+      return apexApi(config);
+    }
+
+    console.log("[APEX] erro:", error.code, error.message);
+    return Promise.reject(error);
+  }
+);
 
 export async function verificarElegibilidade(arbitroId) {
   const { data } = await apexApi.get(`/verificar/${arbitroId}`);
@@ -43,5 +64,3 @@ export async function buscarRanking() {
   const { data } = await apexApi.get("/ranking");
   return data.items || [];
 }
-
-
