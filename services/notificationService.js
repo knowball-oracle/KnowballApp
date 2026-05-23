@@ -85,7 +85,7 @@ export async function notificarBloqueioApex({ arbitroNome, score }) {
   await Notifications.scheduleNotificationAsync({
     content: {
       title: "Denúncia bloqueada pelo Oracle APEX",
-      body: `Árbitro ${arbitroNome} está em alto escrutínio (score ${score}/100). Novas denúncias temporariamente suspensas.`,
+      body: `Árbitro ${arbitroNome} está sob investigação (score ${score}/100). Novas denúncias temporariamente suspensas.`,
       data: {
         tipo: "APEX_BLOQUEADO",
         score,

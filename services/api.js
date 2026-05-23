@@ -1,7 +1,7 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-//URL PREVIA ANTES DE TROCAR PARA O FLYWAY
+
 const BASE_URL = "https://knowball-api.onrender.com";
 
 const api = axios.create({
