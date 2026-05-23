@@ -1,12 +1,11 @@
-import * as Notifications from 'expo-notifications';
-import * as Device from 'expo-device';
-import { Platform } from 'react-native';
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
+import { Platform } from "react-native";
 
-// Configura o comportamento global: como a notificação aparece quando o app está aberto
+// Define como o app reage ao receber uma notificação
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
+    shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: false,
   }),
@@ -14,124 +13,95 @@ Notifications.setNotificationHandler({
 
 /**
  * Solicita permissão de notificação ao usuário.
- * Chamado uma vez no boot do app.
- * Retorna true se a permissão foi concedida.
+ * Chamada uma vez no boot do app.
  */
-export async function requestNotificationPermissions() {
+export async function solicitarPermissaoNotificacao() {
   if (!Device.isDevice) {
-    // Em simulador iOS as notificações não funcionam,
-    // mas em emulador Android sim. Não bloqueia o fluxo.
-    console.log('[notifications] rodando em simulador');
+    console.log("[notif] rodando em simulador");
   }
 
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
   let finalStatus = existingStatus;
 
-  if (existingStatus !== 'granted') {
+  if (existingStatus !== "granted") {
     const { status } = await Notifications.requestPermissionsAsync();
     finalStatus = status;
   }
 
-  // Android exige um canal de notificação explícito a partir do API 26
-  if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('default', {
-      name: 'Notificações Knowball',
+  if (Platform.OS === "android") {
+    await Notifications.setNotificationChannelAsync("default", {
+      name: "Notificações Knowball",
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#0066CC',
+      lightColor: "#d62828",
     });
   }
 
-  return finalStatus === 'granted';
+  return finalStatus === "granted";
 }
 
 /**
- * Dispara notificação local quando o ADMIN avança o status de uma denúncia.
- * @param {object} params
- * @param {string} params.protocolo - código do protocolo (ex: "DEN-2026-00042")
- * @param {string} params.statusAnterior - status anterior (NEW, UNDER_REVIEW)
- * @param {string} params.statusNovo - novo status
+ * Dispara notificação quando ADMIN avança status de denúncia.
  */
-export async function notifyStatusAdvanced({ protocolo, statusAnterior, statusNovo }) {
-  const titulo = `Protocolo ${protocolo} atualizado`;
-  const corpo = `Status alterado: ${labelStatus(statusAnterior)} → ${labelStatus(statusNovo)}`;
-
+export async function notificarStatusAvancado({ protocolo, statusAnterior, statusNovo }) {
   await Notifications.scheduleNotificationAsync({
     content: {
-      title: titulo,
-      body: corpo,
+      title: `Protocolo ${protocolo} atualizado`,
+      body: `Status alterado: ${labelStatus(statusAnterior)} → ${labelStatus(statusNovo)}`,
       data: {
-        tipo: 'STATUS_AVANCADO',
+        tipo: "STATUS_AVANCADO",
         protocolo,
         statusNovo,
- 
-        url: `knowball://historico?protocolo=${protocolo}`,
       },
-      sound: 'default',
+      sound: "default",
     },
     trigger: null,
   });
 }
 
 /**
- * Dispara notificação local quando a comissão define um veredito.
+ * Dispara notificação quando comissão define veredito.
  */
-export async function notifyVerdictSet({ protocolo, veredito }) {
-  const titulo = `Veredito definido — ${protocolo}`;
-  const corpo = `Resultado da análise: ${labelVeredito(veredito)}`;
-
+export async function notificarVeredito({ protocolo, veredito }) {
   await Notifications.scheduleNotificationAsync({
     content: {
-      title: titulo,
-      body: corpo,
+      title: `Veredito definido — ${protocolo}`,
+      body: `Resultado da análise: ${labelVeredito(veredito)}`,
       data: {
-        tipo: 'VEREDITO_DEFINIDO',
+        tipo: "VEREDITO_DEFINIDO",
         protocolo,
         veredito,
-        url: `knowball://historico?protocolo=${protocolo}`,
       },
-      sound: 'default',
+      sound: "default",
     },
     trigger: null,
   });
 }
 
 /**
- * Dispara notificação local quando o APEX bloqueia uma denúncia
- * por score de risco do árbitro ≥ 70.
- * Reforça a integração APEX → app.
+ * Dispara notificação quando APEX bloqueia uma denúncia.
  */
-export async function notifyApexBlocked({ arbitroNome, score }) {
+export async function notificarBloqueioApex({ arbitroNome, score }) {
   await Notifications.scheduleNotificationAsync({
     content: {
-      title: 'Denúncia bloqueada pelo APEX',
-      body: `Árbitro ${arbitroNome} está em alto escrutínio (score ${score}/100). Novas denúncias não são aceitas no momento.`,
+      title: "Denúncia bloqueada pelo Oracle APEX",
+      body: `Árbitro ${arbitroNome} está em alto escrutínio (score ${score}/100). Novas denúncias temporariamente suspensas.`,
       data: {
-        tipo: 'APEX_BLOQUEADO',
+        tipo: "APEX_BLOQUEADO",
         score,
-        url: 'knowball://apex',
       },
-      sound: 'default',
+      sound: "default",
     },
     trigger: null,
   });
 }
 
-
 function labelStatus(status) {
-  const map = {
-    NEW: 'Nova',
-    UNDER_REVIEW: 'Em análise',
-    RESOLVED: 'Resolvida',
-  };
+  const map = { NEW: "Nova", UNDER_REVIEW: "Em análise", RESOLVED: "Resolvida" };
   return map[status] ?? status;
 }
 
 function labelVeredito(veredito) {
-  const map = {
-    POSITIVE: 'Procedente',
-    NEUTRAL: 'Inconclusivo',
-    NEGATIVE: 'Improcedente',
-  };
+  const map = { POSITIVE: "Procedente", NEUTRAL: "Inconclusivo", NEGATIVE: "Improcedente" };
   return map[veredito] ?? veredito;
 }
