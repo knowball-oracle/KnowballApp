@@ -10,6 +10,7 @@ import { listarArbitrosPorPartida } from "../services/refereeService";
 import { verificarElegibilidade, registrarDenunciaApex } from "../services/apexService";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
+import { notificarBloqueioApex } from "../services/notificationService";
 
 export default function Denuncia() {
   const { token, userName, userEmail } = useAuth();
@@ -68,6 +69,7 @@ export default function Denuncia() {
 
     if (elegibilidade.status === "BLOQUEADO") {
       setVerificando(false);
+      await notificarBloqueioApex({ arbitroNome: elegibilidade.nome, score: elegibilidade.score });
       return Alert.alert(
         "🔴 Árbitro Bloqueado pelo APEX",
         `${elegibilidade.nome} possui score de risco ${elegibilidade.score}/100 (${elegibilidade.total_denuncias} denúncias). Novas denúncias estão temporariamente suspensas para este árbitro até análise da comissão.`
