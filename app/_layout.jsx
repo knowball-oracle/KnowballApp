@@ -1,12 +1,35 @@
-import { Tabs } from "expo-router";
+import { useEffect } from "react";
+import { LogBox } from "react-native";
+import { Tabs, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import * as Notifications from "expo-notifications";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import { ThemeProvider, useTheme } from "../context/ThemeContext";
 import QueryProvider from "../providers/QueryProvider";
+import { solicitarPermissaoNotificacao } from "../services/notificationService";
+
+
+LogBox.ignoreLogs(["expo-notifications: Android Push notifications"]);
 
 function TabsComTema() {
   const { cores } = useTheme();
   const { isAdmin } = useAuth();
+
+  useEffect(() => {
+    solicitarPermissaoNotificacao();
+
+    
+    const sub = Notifications.addNotificationResponseReceivedListener((response) => {
+      const data = response.notification.request.content.data;
+      if (data?.tipo === "STATUS_AVANCADO" || data?.tipo === "VEREDITO_DEFINIDO") {
+        router.push("/historico");
+      } else if (data?.tipo === "APEX_BLOQUEADO") {
+        router.push("/apex");
+      }
+    });
+
+    return () => sub.remove();
+  }, []);
 
   return (
     <Tabs
