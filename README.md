@@ -33,9 +33,9 @@
 
 | Recurso | Link |
 |---------|------|
-| 🎥 **Vídeo de Apresentação (YouTube)** | [COLOCAR_LINK_DO_YOUTUBE_AQUI](#) |
-| 📱 **APK no Firebase App Distribution** | Disponível aos testers cadastrados |
-| 🔖 **Hash do commit publicado** | Visível na tela "Sobre o App" dentro do aplicativo |
+| 🎥 **Vídeo de Apresentação (YouTube)** | [Link do vídeo](https://www.youtube.com/watch?v=c1860B2BVmM) |
+| 📱 **APK no Firebase App Distribution** | Disponível aos testers cadastrados (Professor adicionado como Tester.) |
+| 🔖 **Hash do commit publicado** | `c58a998` — visível na tela "Sobre o App". Refere-se ao commit do código-fonte empacotado no APK. |
 | 💻 **Repositório do Backend** | [knowball-api](https://github.com/knowball-oracle/knowball-api) |
 
 ---
@@ -370,7 +370,8 @@ Projeto acadêmico desenvolvido para a disciplina **Mobile Application Developme
 
 <div align="center">
 
-**Knowball** · feito com ⚽ pela equipe **DevAvatar**
+**Knowball** · feito com ⚽
+🦤
 
 [GitHub](https://github.com/knowball-oracle/KnowballApp) · [Backend](https://github.com/knowball-oracle/knowball-api)
 
