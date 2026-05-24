@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { listarDenuncias, atualizarStatusDenuncia, excluirDenuncia } from "../services/reportService";
+import { listarDenuncias, atualizarStatusDenuncia } from "../services/reportService";
 import { buscarMinhasDenuncias } from "../services/apexService";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
@@ -71,14 +71,6 @@ export default function Historico() {
   onError: () => Alert.alert("Erro", "Falha ao atualizar status"),
 });
 
-  const mExcluir = useMutation({
-    mutationFn: excluirDenuncia,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["denuncias"] });
-      Alert.alert("Sucesso", "Denúncia excluída!");
-    },
-    onError: () => Alert.alert("Erro", "Falha ao excluir denúncia"),
-  });
 
   function getProximoStatus(atual) {
     if (atual === "NEW") return "UNDER_REVIEW";
@@ -126,13 +118,6 @@ export default function Historico() {
         text: "Confirmar",
         onPress: () => mStatus.mutate({ id, status: novo, analysisResultType: "NEUTRAL" }),
       },
-    ]);
-  }
-
-  function confirmarExcluir(id, protocolo) {
-    Alert.alert("Excluir denúncia", `Remover o protocolo ${protocolo}?`, [
-      { text: "Cancelar" },
-      { text: "Excluir", style: "destructive", onPress: () => mExcluir.mutate(id) },
     ]);
   }
 
@@ -294,17 +279,6 @@ export default function Historico() {
                     </Text>
                   </TouchableOpacity>
 
-                  {isAdmin() && (
-                    <TouchableOpacity
-                      style={styles.acaoBtn}
-                      onPress={() => confirmarExcluir(item.id, protocolo)}
-                    >
-                      <Ionicons name="trash-outline" size={16} color="#ff4444" />
-                      <Text style={[styles.acaoTexto, { color: "#ff4444" }]}>
-                        Excluir
-                      </Text>
-                    </TouchableOpacity>
-                  )}
                 </View>
               </View>
             );

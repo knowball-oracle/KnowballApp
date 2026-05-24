@@ -106,7 +106,8 @@ export default function Denuncia() {
         params: { nome: userName, protocolo: apexResp.protocolo },
       });
     } catch (e) {
-      Alert.alert("Erro", "Falha ao registrar denúncia");
+      Alert.alert("Erro", "Falha ao registrar denúncia"
+      );
     } finally {
       setVerificando(false);
     }
