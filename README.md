@@ -4,7 +4,7 @@
 
 ### Sistema Anti-Manipulação no Futebol de Base
 
-**Sprint 4 — Entrega Final** · Mobile Application Development · FIAP 2026
+**Sprint 4** · Mobile Application Development · FIAP 2026
 
 [![React Native](https://img.shields.io/badge/React_Native-Expo_SDK_54-61DAFB?logo=react&logoColor=white)](https://expo.dev)
 [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-6DB33F?logo=spring&logoColor=white)](https://spring.io/projects/spring-boot)
