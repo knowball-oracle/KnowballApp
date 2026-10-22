@@ -86,7 +86,6 @@ export default function InicioUsuario() {
         <Text variant="body">
           Descreva os fatos observados e acompanhe o andamento pelo protocolo. {NOT_PROOF}
         </Text>
-        <Button title="Registrar denúncia" onPress={newReport} />
         <Button title="Como funciona" variant="secondary" leftIcon={Sparkles} icon={null} onPress={() => router.push('/faq')} />
       </Panel>
 

@@ -14,6 +14,7 @@ import {
 import Animated, { useReducedMotion, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, motion, size, space, ui } from '@/theme/tokens';
+import { tabBarBottom } from './TabBar';
 
 export interface ScreenProps {
   children: ReactNode;
@@ -46,9 +47,10 @@ function enter() {
   };
 }
 
+/** Espaço no fim das telas com abas: altura da tab bar flutuante + distância da base + respiro. */
 export function useTabBarInset() {
   const insets = useSafeAreaInsets();
-  return size.tabBar + insets.bottom + space.xl;
+  return size.tabBar + tabBarBottom(insets.bottom) + space.xl;
 }
 
 export function Screen({

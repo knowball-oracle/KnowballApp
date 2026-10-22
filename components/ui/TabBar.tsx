@@ -22,14 +22,25 @@ export interface TabBarProps extends BottomTabBarProps {
   items: TabItem[];
 }
 
-/** Tab bar com blur sobre rgba(10,10,10,0.8). Ativo branco, inativo textMuted. Sem vermelho. */
+/** Distância da tab bar até a base da tela: o safe area (ou 16 em aparelhos sem ele). */
+export function tabBarBottom(insetBottom: number): number {
+  return insetBottom > 0 ? insetBottom : space.lg;
+}
+
+/**
+ * Tab bar flutuante: margem lateral 16, raio 24, blur sobre rgba(10,10,10,0.8)
+ * e borda rgba(255,255,255,0.07). Ativo branco, inativo textMuted. Sem vermelho.
+ */
 export function TabBar({ state, navigation, items }: TabBarProps) {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.bar, { paddingBottom: insets.bottom, height: size.tabBar + insets.bottom }]}>
-      <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
-      <View style={[StyleSheet.absoluteFill, styles.tint]} />
+    <View style={[styles.bar, { bottom: tabBarBottom(insets.bottom) }]}>
+      {/* O fundo recorta o blur no raio; a barra em si não recorta, para o botão central sobressair. */}
+      <View style={styles.background} pointerEvents="none">
+        <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
+        <View style={[StyleSheet.absoluteFill, styles.tint]} />
+      </View>
       <View style={styles.row}>
         {state.routes.map((route, index) => {
           const item = items.find((i) => i.name === route.name);
@@ -87,12 +98,27 @@ export function TabBar({ state, navigation, items }: TabBarProps) {
 const styles = StyleSheet.create({
   bar: {
     position: 'absolute',
-    left: 0,
+    left: space.lg,
+    right: space.lg,
+    height: size.tabBar,
+    borderRadius: radius.xl,
+    overflow: 'visible',
+    shadowColor: ui.shadow,
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 12,
+  },
+  background: {
+    position: 'absolute',
+    top: 0,
     right: 0,
     bottom: 0,
-    borderTopWidth: 1,
-    borderTopColor: ui.tabBarBorder,
-    overflow: 'visible',
+    left: 0,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: ui.tabBarBorder,
+    overflow: 'hidden',
   },
   tint: { backgroundColor: ui.tabBar },
   row: { flex: 1, flexDirection: 'row', alignItems: 'center', paddingHorizontal: space.sm },
