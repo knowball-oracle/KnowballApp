@@ -14,7 +14,9 @@ const logo = require('@/assets/images/logo.svg');
 export function WakeScreen({ seconds, error, onRetry, retrying }: { seconds: number; error?: unknown; onRetry?: () => void; retrying?: boolean }) {
   return (
     <View style={styles.root}>
-      <Image source={logo} style={styles.logo} contentFit="contain" accessibilityLabel="Knowball" />
+      <View style={styles.logoWrap}>
+        <Image source={logo} style={styles.logo} contentFit="contain" accessibilityLabel="Knowball" />
+      </View>
       {error ? (
         <ErrorState
           title="O servidor não respondeu"
@@ -80,7 +82,10 @@ export function ServerGate({ children }: { children: ReactNode }) {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg, justifyContent: 'center', padding: space.xl, gap: space.xxl },
   blank: { flex: 1, backgroundColor: colors.bg },
-  logo: { width: 160, height: 43, alignSelf: 'center' },
+  // SVG desenhado no tamanho intrínseco (123×33) e ampliado pela escala, para
+  // ficar centralizado mesmo quando o renderizador ignora o contentFit.
+  logoWrap: { alignSelf: 'stretch', alignItems: 'center', justifyContent: 'center', height: 48 },
+  logo: { width: 123, height: 33, transform: [{ scale: 1.3 }] },
   text: { gap: space.md },
   spinner: { marginTop: space.lg },
 });

@@ -1,3 +1,4 @@
+import { BlurView } from 'expo-blur';
 import type { ReactNode } from 'react';
 import {
   KeyboardAvoidingView,
@@ -12,7 +13,7 @@ import {
 } from 'react-native';
 import Animated, { useReducedMotion, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, motion, size, space } from '@/theme/tokens';
+import { colors, motion, size, space, ui } from '@/theme/tokens';
 
 export interface ScreenProps {
   children: ReactNode;
@@ -116,6 +117,11 @@ export function Screen({
       ) : (
         animated
       )}
+      {/* Fundo fixo atrás da barra de status: o conteúdo rolado não passa por baixo do relógio. */}
+      <View pointerEvents="none" style={[styles.statusBar, { height: insets.top }]}>
+        <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
+        <View style={[StyleSheet.absoluteFill, styles.statusTint]} />
+      </View>
     </View>
   );
 }
@@ -125,6 +131,8 @@ const styles = StyleSheet.create({
   fill: { flex: 1 },
   content: { paddingHorizontal: space.lg, gap: space.xl },
   edge: { paddingHorizontal: 0 },
+  statusBar: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, overflow: 'hidden' },
+  statusTint: { backgroundColor: ui.tabBar },
   footer: {
     paddingHorizontal: space.lg,
     paddingTop: space.md,

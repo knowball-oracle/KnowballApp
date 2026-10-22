@@ -46,7 +46,9 @@ export function Hero({
         source={image}
         style={StyleSheet.absoluteFill}
         contentFit="cover"
-        transition={200}
+        // Foto nítida: sem transição e sem reduzir a resolução no decode (o iOS
+        // decodificava no tamanho do primeiro layout e esticava a imagem).
+        allowDownscaling={false}
         accessible={!!imageAccessibilityLabel}
         accessibilityLabel={imageAccessibilityLabel}
       />
@@ -61,8 +63,8 @@ export function Hero({
         {eyebrow ? <Text variant="eyebrow">{eyebrow}</Text> : null}
         {title || titleLight ? (
           <View accessible accessibilityRole="header" accessibilityLabel={[title, titleLight].filter(Boolean).join(' ')}>
-            {title ? <Text variant="display">{title}</Text> : null}
-            {titleLight ? <Text variant="displayLight">{titleLight}</Text> : null}
+            {title ? <Text variant="heroDisplay">{title}</Text> : null}
+            {titleLight ? <Text variant="heroDisplayLight">{titleLight}</Text> : null}
           </View>
         ) : null}
         {description ? <Text variant="body">{description}</Text> : null}
