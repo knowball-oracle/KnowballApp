@@ -1,5 +1,5 @@
-import { ComingSoon } from '@/components/ComingSoon';
+import { KikoScreen } from '@/features/kiko/KikoScreen';
 
-export default function Screen() {
-  return <ComingSoon title="Kiko" phase="4" eyebrow="Assistente Knowball" withTabBar />;
+export default function Kiko() {
+  return <KikoScreen />;
 }
