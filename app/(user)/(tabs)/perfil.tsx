@@ -1,6 +1,5 @@
-import { ProfilePlaceholder } from '@/features/profile/ProfilePlaceholder';
+import { ProfileScreen } from '@/features/profile/ProfileScreen';
 
-// Fase 4: troca pela tela de Perfil final (foto).
 export default function Perfil() {
-  return <ProfilePlaceholder />;
+  return <ProfileScreen />;
 }
