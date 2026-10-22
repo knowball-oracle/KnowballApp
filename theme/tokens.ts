@@ -36,7 +36,13 @@ export const category = {
   SUB_20: { label: 'Sub-20', fg: '#FB7185', bg: 'rgba(244,63,94,0.10)' },
 } as const;
 
-export const radius = { sm: 8, md: 12, lg: 16, xl: 24, full: 999 } as const;
+/** Perfil de acesso (o web usa roxo para ROLE_ADMIN). */
+export const role = {
+  ROLE_ADMIN: { label: 'Admin', fg: '#C4B5FD', bg: 'rgba(139,92,246,0.15)', border: 'rgba(139,92,246,0.20)' },
+  ROLE_USER: { label: 'Usuário', fg: 'rgba(255,255,255,0.65)', bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.10)' },
+} as const;
+
+export const radius ={ sm: 8, md: 12, lg: 16, xl: 24, full: 999 } as const;
 export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 } as const;
 
 /** Valores derivados das regras de componentes do DESIGN.md. */

@@ -120,3 +120,45 @@ export function gameMoment(matchDate: LocalDateTime, now = new Date()): GameMome
 export function byDateDesc<T>(get: (item: T) => string) {
   return (a: T, b: T) => (get(a) < get(b) ? 1 : get(a) > get(b) ? -1 : 0);
 }
+
+// Campos de formulário (admin): datas digitadas como dd/mm/aaaa e horas como HH:mm.
+
+/** Aplica a máscara dd/mm/aaaa enquanto o usuário digita. */
+export function maskDate(text: string): string {
+  const d = text.replace(/\D/g, '').slice(0, 8);
+  if (d.length <= 2) return d;
+  if (d.length <= 4) return `${d.slice(0, 2)}/${d.slice(2)}`;
+  return `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4)}`;
+}
+
+/** Aplica a máscara HH:mm. */
+export function maskTime(text: string): string {
+  const d = text.replace(/\D/g, '').slice(0, 4);
+  return d.length <= 2 ? d : `${d.slice(0, 2)}:${d.slice(2)}`;
+}
+
+/** "dd/mm/aaaa" → "aaaa-mm-dd" (LocalDate), ou null se a data não existir. */
+export function brToLocalDate(value: string): LocalDate | null {
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);
+  if (!m) return null;
+  const [day, month, year] = [+m[1], +m[2], +m[3]];
+  const d = new Date(year, month - 1, day);
+  if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) return null;
+  return toLocalDateString(d);
+}
+
+/** "HH:mm" válido? */
+export function isValidTime(value: string): boolean {
+  const m = /^(\d{2}):(\d{2})$/.exec(value);
+  return !!m && +m[1] < 24 && +m[2] < 60;
+}
+
+/** LocalDate/LocalDateTime → "dd/mm/aaaa" para preencher o formulário. */
+export function localToBrDate(value: LocalDate | LocalDateTime | null | undefined): string {
+  return value ? formatLocalDateTime(value, 'date').replace('—', '') : '';
+}
+
+/** LocalDateTime → "HH:mm". */
+export function localToTime(value: LocalDateTime | null | undefined): string {
+  return value ? formatLocalDateTime(value, 'time').replace('—', '') : '';
+}
