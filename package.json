@@ -9,7 +9,8 @@
     "ios": "node scripts/write-version.js && expo start --ios",
     "web": "expo start --web",
     "test": "jest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:android": "node scripts/write-version.js && npx eas-cli build --platform android --profile preview"
   },
   "dependencies": {
     "@expo-google-fonts/sora": "^0.4.2",
