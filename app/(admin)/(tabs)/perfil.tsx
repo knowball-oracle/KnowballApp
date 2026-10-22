@@ -1,5 +1,6 @@
-import { ComingSoon } from '@/components/ComingSoon';
+import { ProfilePlaceholder } from '@/features/profile/ProfilePlaceholder';
 
-export default function Screen() {
-  return <ComingSoon title="Perfil" phase="4" eyebrow="Sua conta" withTabBar />;
+// Fase 4: troca pela tela de Perfil final (foto).
+export default function Perfil() {
+  return <ProfilePlaceholder />;
 }

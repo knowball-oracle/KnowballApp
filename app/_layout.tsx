@@ -17,6 +17,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ServerGate } from '@/components/ServerGate';
 import { OfflineBanner, ToastProvider } from '@/components/ui';
 import { QueryProvider } from '@/providers/QueryProvider';
+import { SessionProvider } from '@/session/SessionProvider';
 import { colors } from '@/theme/tokens';
 
 void SplashScreen.preventAutoHideAsync();
@@ -43,11 +44,13 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <QueryProvider>
           <ToastProvider>
-            <StatusBar style="light" />
-            <ServerGate>
-              <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg }, animation: 'fade' }} />
-            </ServerGate>
-            <OfflineBanner />
+            <SessionProvider>
+              <StatusBar style="light" />
+              <ServerGate>
+                <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg }, animation: 'fade' }} />
+              </ServerGate>
+              <OfflineBanner />
+            </SessionProvider>
           </ToastProvider>
         </QueryProvider>
       </SafeAreaProvider>

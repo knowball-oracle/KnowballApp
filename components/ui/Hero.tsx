@@ -13,6 +13,8 @@ export interface HeroProps {
   title?: string;
   /** Segunda linha do título em Sora Light. */
   titleLight?: string;
+  /** Cor da segunda linha (ex.: accent em "o jogo."). */
+  titleLightColor?: string;
   description?: string;
   /** Canto superior direito (ex.: GlassPill "+ Nova"). */
   topRight?: ReactNode;
@@ -30,6 +32,7 @@ export function Hero({
   eyebrow,
   title,
   titleLight,
+  titleLightColor,
   description,
   topRight,
   topLeft,
@@ -64,7 +67,11 @@ export function Hero({
         {title || titleLight ? (
           <View accessible accessibilityRole="header" accessibilityLabel={[title, titleLight].filter(Boolean).join(' ')}>
             {title ? <Text variant="heroDisplay">{title}</Text> : null}
-            {titleLight ? <Text variant="heroDisplayLight">{titleLight}</Text> : null}
+            {titleLight ? (
+              <Text variant="heroDisplayLight" color={titleLightColor}>
+                {titleLight}
+              </Text>
+            ) : null}
           </View>
         ) : null}
         {description ? <Text variant="body">{description}</Text> : null}

@@ -1,8 +1,11 @@
 import { Redirect } from 'expo-router';
-import { ComingSoon } from '@/components/ComingSoon';
+import { View } from 'react-native';
+import { homeFor, useSession } from '@/session/SessionProvider';
+import { colors } from '@/theme/tokens';
 
-// Fase 1 troca isto pelo redirecionamento por sessão: (auth) | (user) | (admin).
+/** Redireciona pela sessão: (auth) | (user) | (admin). */
 export default function Index() {
-  if (__DEV__) return <Redirect href="/dev/catalogo" />;
-  return <ComingSoon title="Knowball" phase="1" />;
+  const { status, user } = useSession();
+  if (status === 'loading') return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
+  return <Redirect href={homeFor(user)} />;
 }

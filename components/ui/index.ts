@@ -5,6 +5,7 @@ export { Chip, type ChipProps } from './Chip';
 export { GlassPill, type GlassPillProps } from './GlassPill';
 export { Hero, type HeroProps } from './Hero';
 export { Input, type InputProps } from './Input';
+export { Notice, type NoticeProps, type NoticeTone } from './Notice';
 export { OfflineBanner } from './OfflineBanner';
 export { PageHeader, type PageHeaderProps } from './PageHeader';
 export { Panel, type PanelProps } from './Panel';
