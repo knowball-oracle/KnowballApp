@@ -7,17 +7,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#0A0A0A",
-    "newArchEnabled": true,
     "scheme": "knowball",
-    "notification": {
-      "icon": "./assets/icon.png",
-      "color": "#F87171"
-    },
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#0A0A0A"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.knowball.app"
@@ -27,7 +17,6 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0A0A0A"
       },
-      "edgeToEdgeEnabled": true,
       "package": "com.knowball.app",
       "permissions": [
         "NOTIFICATIONS",
@@ -57,7 +46,9 @@
           "resizeMode": "contain",
           "backgroundColor": "#0A0A0A"
         }
-      ]
+      ],
+      "expo-image",
+      "expo-status-bar"
     ],
     "extra": {
       "router": {},

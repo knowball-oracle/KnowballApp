@@ -1,4 +1,4 @@
-import { Tabs } from 'expo-router';
+import { Tabs } from 'expo-router/js-tabs';
 import { ClipboardList, FolderKanban, LayoutDashboard, MessageCircle, User } from 'lucide-react-native';
 import { TabBar, type TabItem } from '@/components/ui';
 
