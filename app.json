@@ -5,35 +5,30 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0A0A0A",
     "newArchEnabled": true,
     "scheme": "knowball",
     "notification": {
       "icon": "./assets/icon.png",
-      "color": "#d62828"
+      "color": "#F87171"
     },
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#0A0A0A"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.knowball.app",
-      "infoPlist": {
-        "UIBackgroundModes": [
-          "remote-notification"
-        ]
-      }
+      "bundleIdentifier": "com.knowball.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#0A0A0A"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.knowball.app",
-      "useNextNotificationsApi": true,
       "permissions": [
         "NOTIFICATIONS",
         "POST_NOTIFICATIONS"
@@ -43,7 +38,26 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-secure-store",
+      "expo-web-browser",
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#F87171"
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "resizeMode": "contain",
+          "backgroundColor": "#0A0A0A"
+        }
+      ]
     ],
     "extra": {
       "router": {},
