@@ -147,7 +147,7 @@ O `build:android` roda o `scripts/write-version.js` antes do `eas build`, então
   <tr>
     <td align="center">
       <a href="https://github.com/castropatrick"><b>Patrick Castro</b></a><br />
-      <a href="https://www.linkedin.com/in/patrick-castro-839aa2273/">LinkedIn</a>
+      <a href="https://www.linkedin.com/in/patrick-castro-quintana-839aa2273/">LinkedIn</a>
     </td>
     <td align="center">
       <a href="https://github.com/GabrielRossi01"><b>Gabriel Rossi</b></a><br />

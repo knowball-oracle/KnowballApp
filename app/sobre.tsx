@@ -17,7 +17,7 @@ const TEAM = [
     name: 'Patrick Castro',
     photo: require('@/assets/team/patrick.jpg'),
     github: 'https://github.com/castropatrick',
-    linkedin: 'https://www.linkedin.com/in/patrick-castro-839aa2273/',
+    linkedin: 'https://www.linkedin.com/in/patrick-castro-quintana-839aa2273/',
   },
   {
     name: 'Gabriel Rossi',
