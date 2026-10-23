@@ -18,7 +18,7 @@ const versionInfo = {
   commitHash,
   commitHashFull,
   buildDate,
-  appVersion: "1.0.0",
+  appVersion: require("../app.json").expo.version,
 };
 
 const outputPath = path.join(__dirname, "..", "assets", "version.json");
