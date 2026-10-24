@@ -11,6 +11,7 @@ import {
   StyleSheet,
   TextInput,
   View,
+  type ScrollViewInstance,
 } from 'react-native';
 import Animated, {
   FadeInUp,
@@ -84,7 +85,7 @@ export function KikoScreen() {
   const { messages, streamingId, send, reset } = useKikoChat();
   const [text, setText] = useState('');
   const [keyboardOpen, setKeyboardOpen] = useState(false);
-  const scroll = useRef<ScrollView>(null);
+  const scroll = useRef<ScrollViewInstance>(null);
 
   useEffect(() => {
     const show = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', () => setKeyboardOpen(true));

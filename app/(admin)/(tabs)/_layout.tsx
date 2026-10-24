@@ -10,9 +10,11 @@ const items: TabItem[] = [
   { name: 'perfil', label: 'Perfil', icon: User },
 ];
 
+export const unstable_settings = { anchor: 'inicio' };
+
 export default function AdminTabs() {
   return (
-    <Tabs initialRouteName="inicio" screenOptions={{ headerShown: false }} tabBar={(props) => <TabBar {...props} items={items} />}>
+    <Tabs screenOptions={{ headerShown: false }} tabBar={(props) => <TabBar {...props} items={items} />}>
       <Tabs.Screen name="inicio" />
       <Tabs.Screen name="denuncias" />
       <Tabs.Screen name="cadastros" />

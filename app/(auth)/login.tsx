@@ -5,7 +5,7 @@ import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { ExternalLink } from 'lucide-react-native';
 import { useRef, useState } from 'react';
-import { Pressable, StyleSheet, View, type TextInput } from 'react-native';
+import { Pressable, StyleSheet, View, type TextInputInstance } from 'react-native';
 import { Button, Card, Input, Notice, PageHeader, Screen, Text } from '@/components/ui';
 import { WEB_URL } from '@/config';
 import { authService } from '@/services/auth';
@@ -35,7 +35,7 @@ function loginErrorMessage(e: unknown): string {
 
 export default function Login() {
   const { signIn } = useSession();
-  const passwordRef = useRef<TextInput>(null);
+  const passwordRef = useRef<TextInputInstance>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [touched, setTouched] = useState(false);

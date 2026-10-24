@@ -31,7 +31,7 @@ export function tabBarBottom(insetBottom: number): number {
  * Tab bar flutuante: margem lateral 16, raio 24, blur sobre rgba(10,10,10,0.8)
  * e borda rgba(255,255,255,0.07). Ativo branco, inativo textMuted. Sem vermelho.
  */
-export function TabBar({ state, navigation, items }: TabBarProps) {
+export function TabBar({ state, emitter, navigateToTab, items }: TabBarProps) {
   const insets = useSafeAreaInsets();
 
   return (
@@ -54,8 +54,8 @@ export function TabBar({ state, navigation, items }: TabBarProps) {
               item.onPress();
               return;
             }
-            const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
-            if (!focused && !event.defaultPrevented) navigation.navigate(route.name);
+            const event = emitter.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
+            if (!focused && !event.defaultPrevented) navigateToTab(route.key);
           };
 
           if (item.center) {

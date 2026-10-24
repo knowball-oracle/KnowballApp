@@ -18,10 +18,12 @@ const items: TabItem[] = [
   { name: 'perfil', label: 'Perfil', icon: User },
 ];
 
+export const unstable_settings = { anchor: 'inicio' };
+
 export default function UserTabs() {
   useReportStatusWatcher();
   return (
-    <Tabs initialRouteName="inicio" screenOptions={{ headerShown: false }} tabBar={(props) => <TabBar {...props} items={items} />}>
+    <Tabs screenOptions={{ headerShown: false }} tabBar={(props) => <TabBar {...props} items={items} />}>
       <Tabs.Screen name="inicio" />
       <Tabs.Screen name="protocolos" />
       <Tabs.Screen name="denunciar" />

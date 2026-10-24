@@ -6,8 +6,8 @@
 
 Mobile Application Development · FIAP 2026
 
-[![Expo](https://img.shields.io/badge/Expo-SDK_57-000020?logo=expo&logoColor=white)](https://expo.dev)
-[![React Native](https://img.shields.io/badge/React_Native-0.86-61DAFB?logo=react&logoColor=white)](https://reactnative.dev)
+[![Expo](https://img.shields.io/badge/Expo-SDK_58-000020?logo=expo&logoColor=white)](https://expo.dev)
+[![React Native](https://img.shields.io/badge/React_Native-0.88-61DAFB?logo=react&logoColor=white)](https://reactnative.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?logo=spring&logoColor=white)](https://spring.io/projects/spring-boot)
 
@@ -101,7 +101,7 @@ scripts/        write-version.js (hash do commit para a tela Sobre)
 
 ## 🚀 Como executar
 
-Pré-requisitos: Node.js 20.19.4+ e o app **Expo Go 57** no celular.
+Pré-requisitos: Node.js 20.19.4+ e o app **Expo Go 58** no celular.
 
 ```bash
 git clone https://github.com/knowball-oracle/KnowballApp.git
@@ -135,7 +135,7 @@ O `build:android` roda o `scripts/write-version.js` antes do `eas build`, então
 
 ## 🧪 Tecnologias
 
-**Mobile**: Expo SDK 57, React Native 0.86, Expo Router, TypeScript, TanStack Query 5, Reanimated 4, expo-image, expo-blur, expo-secure-store, expo-notifications, lucide-react-native.
+**Mobile**: Expo SDK 58, React Native 0.88, Expo Router, TypeScript, TanStack Query 5, Reanimated 4, expo-image, expo-blur, expo-secure-store, expo-notifications, lucide-react-native.
 **Backend**: Spring Boot 3.5, Java 21, Oracle, JWT RS256, Spring AI (Kiko), deploy no Railway.
 **Web**: Angular 21 + Tailwind 4, deploy na Vercel.
 

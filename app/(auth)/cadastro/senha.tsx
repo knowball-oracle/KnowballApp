@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
-import type { TextInput } from 'react-native';
+import type { TextInputInstance } from 'react-native';
 import { Input } from '@/components/ui';
 import { useRegister } from '@/features/register/RegisterContext';
 import { RegisterStep } from '@/features/register/RegisterStep';
@@ -8,7 +8,7 @@ import { validatePassword } from '@/utils/validation';
 
 export default function CadastroSenha() {
   const { data, update } = useRegister();
-  const confirmRef = useRef<TextInput>(null);
+  const confirmRef = useRef<TextInputInstance>(null);
   const [touched, setTouched] = useState(false);
   const passwordError = validatePassword(data.password);
   const confirmError = !data.confirm

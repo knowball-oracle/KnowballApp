@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react-native';
 import { Eye, EyeOff } from 'lucide-react-native';
 import { forwardRef, useState } from 'react';
-import { Pressable, StyleSheet, TextInput, View, type StyleProp, type TextInputProps, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, TextInput, View, type StyleProp, type TextInputInstance, type TextInputProps, type ViewStyle } from 'react-native';
 import { colors, radius, size, space, ui } from '@/theme/tokens';
 import { fonts } from '@/theme/typography';
 import { Text } from './Text';
@@ -19,7 +19,7 @@ export interface InputProps extends Omit<TextInputProps, 'style'> {
   inputStyle?: TextInputProps['style'];
 }
 
-export const Input = forwardRef<TextInput, InputProps>(function Input(
+export const Input = forwardRef<TextInputInstance, InputProps>(function Input(
   { label, hint, error, icon: Icon, counter, password, multiline, maxLength, value, containerStyle, inputStyle, onFocus, onBlur, ...rest },
   ref,
 ) {
