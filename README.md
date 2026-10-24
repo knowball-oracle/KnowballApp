@@ -1,5 +1,11 @@
 <div align="center">
 
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+npm i
+
+
+
+
 # 🏆 KnowBall
 
 ### Denúncias seguras contra manipulação no futebol de base
