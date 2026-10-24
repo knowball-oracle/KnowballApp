@@ -101,16 +101,16 @@ scripts/        write-version.js (hash do commit para a tela Sobre)
 
 ## 🚀 Como executar
 
-Pré-requisitos: Node.js 20.19.4+ e o app **Expo Go 58** no celular.
+Pré-requisitos: Node.js 22.13+ ou 24.3+ e o app **Expo Go 58** no celular.
 
 ```bash
 git clone https://github.com/knowball-oracle/KnowballApp.git
 cd KnowballApp
-npm install
+npm ci               # instala exatamente as versões do package-lock.json
 npm start            # grava assets/version.json e abre o Expo
 ```
 
-Escaneie o QR code com a câmera (iOS) ou com o Expo Go (Android). Para apontar para outra API, defina `EXPO_PUBLIC_API_URL`.
+Escaneie o QR code com a câmera (iOS) ou com o Expo Go (Android). Se o celular e o computador não estiverem na mesma rede, use `npx expo start --tunnel`. Para apontar para outra API, defina `EXPO_PUBLIC_API_URL`.
 
 Contas criadas com Google funcionam só no site (o OAuth da API redireciona para o web); no app, entre com e-mail e senha.
 
