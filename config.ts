@@ -1,9 +1,9 @@
-export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://knowball-api.onrender.com';
+export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://knowball-api-production.up.railway.app';
 export const WEB_URL = 'https://knowball-web-henna.vercel.app';
 export const APEX_URL = 'https://oracleapex.com/ords/r/knowball_iot/knowball/dashboard-knowball';
 
 export const TIMEOUT_MS = 20_000;
-/** O Render pode levar até ~60 s para acordar. */
+/** A primeira chamada pode demorar se o servidor estiver ocioso. */
 export const HEALTH_TIMEOUT_MS = 75_000;
 /** Só mostra "Acordando o servidor" se o ping demorar mais que isso. */
 export const WAKE_SCREEN_DELAY_MS = 1_500;

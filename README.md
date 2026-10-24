@@ -17,11 +17,11 @@ Mobile Application Development · FIAP 2026
 
 ## 📋 Aviso
 
-> ⚠️ **A API fica no Render (plano gratuito) e hiberna sem uso.**
+> ⚠️ **A API fica no Railway.**
 >
-> Na primeira abertura, o app mostra a tela **“Acordando o servidor”** enquanto faz o ping em `GET /auth/health`. Isso pode levar até um minuto; depois, tudo responde normalmente.
+> Ao abrir, o app faz um ping em `GET /auth/health`; se o servidor demorar a responder, mostra a tela **“Acordando o servidor”** até ele ficar disponível.
 >
-> API: [https://knowball-api.onrender.com](https://knowball-api.onrender.com) · Site: [https://knowball-web-henna.vercel.app](https://knowball-web-henna.vercel.app)
+> API: [https://knowball-api-production.up.railway.app](https://knowball-api-production.up.railway.app) · Site: [https://knowball-web-henna.vercel.app](https://knowball-web-henna.vercel.app)
 
 ---
 
@@ -136,7 +136,7 @@ O `build:android` roda o `scripts/write-version.js` antes do `eas build`, então
 ## 🧪 Tecnologias
 
 **Mobile**: Expo SDK 57, React Native 0.86, Expo Router, TypeScript, TanStack Query 5, Reanimated 4, expo-image, expo-blur, expo-secure-store, expo-notifications, lucide-react-native.
-**Backend**: Spring Boot 3.5, Java 21, Oracle, JWT RS256, Spring AI (Kiko), deploy no Render.
+**Backend**: Spring Boot 3.5, Java 21, Oracle, JWT RS256, Spring AI (Kiko), deploy no Railway.
 **Web**: Angular 21 + Tailwind 4, deploy na Vercel.
 
 ---
